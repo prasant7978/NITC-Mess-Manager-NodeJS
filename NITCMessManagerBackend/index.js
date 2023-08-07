@@ -13,6 +13,9 @@ const app = express()
 
 app.use(express.json())
 
-app.listen(3000, () => {
+const authenticationRouter = require("./routes/auth.js")
+app.use('/auth', authenticationRouter)
+
+app.listen(3000, '192.168.116.103', () => {
     console.log("listening on port 3000 ...")
 })

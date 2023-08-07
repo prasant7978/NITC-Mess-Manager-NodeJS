@@ -1,5 +1,6 @@
 package com.kumar.messmanager.authentication
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.content.Intent
@@ -9,19 +10,19 @@ import android.view.View
 import android.widget.Toast
 import com.kumar.messmanager.R
 import com.kumar.messmanager.admin.AdminDashboardActivity
+import com.kumar.messmanager.authentication.services.AuthenticationServiceBuilder
+import com.kumar.messmanager.authentication.services.AuthenticationServices
 import com.kumar.messmanager.contractor.ContractorDashboard
 import com.kumar.messmanager.databinding.ActivityLoginBinding
 import com.kumar.messmanager.student.StudentDashboardActivity
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
     lateinit var loginBinding : ActivityLoginBinding
     private var userType : String = "Student"
-//    val auth : FirebaseAuth = FirebaseAuth.getInstance()
-//    val db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    private val studentReference = db.reference.child("students")
-//    private val adminReference = db.reference.child("admin")
-//    private val contractorReference = db.reference.child("contractors")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +80,7 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, "Please enter both email and password to login.", Toast.LENGTH_SHORT).show()
             }
             else {
-//                signinWithFirebase(userEmail, userPassword, userType)
+                signinWithFirebase(userEmail, userPassword, userType)
             }
         }
 
@@ -154,179 +155,150 @@ class LoginActivity : AppCompatActivity() {
 //        }
 //    }
 
-//    private fun signinWithFirebase(email:String, pass:String, userType:String){
-//        loginBinding.buttonSignin.isClickable = false
-//        loginBinding.progressBarLogin.visibility = View.VISIBLE
-//        when (userType) {
-//            "Student" -> {
-//                if (!checkConstraints(email)) {
-//                    Toast.makeText(
-//                        this@LoginActivity,
-//                        "Enter a valid nitc email id",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                    loginBinding.buttonSignin.isClickable = true
-//                    loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                }
-//                else {
-//                    Log.d("user", auth.currentUser?.isEmailVerified.toString())
-//                    Log.d("user", auth.currentUser?.uid.toString())
-//                    auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener { task ->
-//                        if (task.isSuccessful) {
-//                            if (auth.currentUser?.isEmailVerified == true) {
-//                                Toast.makeText(this, "Email is verified", Toast.LENGTH_SHORT).show()
-//                                studentReference.orderByChild("studentEmail").equalTo(email)
-//                                    .addListenerForSingleValueEvent(object : ValueEventListener {
-//                                        override fun onDataChange(snapshot: DataSnapshot) {
-//                                            if (snapshot.exists()) {
-//                                                auth.signInWithEmailAndPassword(email, pass)
-//                                                    .addOnCompleteListener { task ->
-//                                                        if (task.isSuccessful) {
-////                                        Toast.makeText(applicationContext, "Welcome", Toast.LENGTH_SHORT).show()
-//                                                            val intent = Intent(
-//                                                                this@LoginActivity,
-//                                                                StudentDashboardActivity::class.java
-//                                                            )
-//                                                            intent.putExtra("userType", userType)
-//                                                            startActivity(intent)
-//                                                            loginBinding.buttonSignin.isClickable =
-//                                                                true
-//                                                            loginBinding.progressBarLogin.visibility =
-//                                                                View.INVISIBLE
-//                                                            finish()
-//                                                        }
-//                                                        else {
-//                                                            Toast.makeText(
-//                                                                applicationContext,
-//                                                                task.exception?.localizedMessage.toString(),
-//                                                                Toast.LENGTH_SHORT
-//                                                            ).show()
-//                                                            loginBinding.buttonSignin.isClickable =
-//                                                                true
-//                                                            loginBinding.progressBarLogin.visibility =
-//                                                                View.INVISIBLE
-//                                                        }
-//                                                    }
-//                                            }
-//                                            else {
-//                                                Toast.makeText(
-//                                                    applicationContext,
-//                                                    "Incorrect username or password",
-//                                                    Toast.LENGTH_SHORT
-//                                                ).show()
-//                                                loginBinding.buttonSignin.isClickable = true
-//                                                loginBinding.progressBarLogin.visibility =
-//                                                    View.INVISIBLE
-//                                            }
-//                                        }
-//
-//                                        override fun onCancelled(error: DatabaseError) {
-//                                            TODO("Not yet implemented")
-//                                        }
-//                                    })
-//                            }
-//                            else {
-//                                Toast.makeText(
-//                                    this,
-//                                    "Please verify your email first",
-//                                    Toast.LENGTH_SHORT
-//                                ).show()
-//                                auth.signOut()
-//                                loginBinding.buttonSignin.isClickable = true
-//                                loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                            }
-//                        }
-//                        else{
-//                            Toast.makeText(this, task.exception?.localizedMessage, Toast.LENGTH_SHORT).show()
-//                            loginBinding.buttonSignin.isClickable = true
-//                            loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                        }
-//                    }
-//                }
-//            }
-//
-//            "Admin" -> {
-//                adminReference.orderByChild("adminEmail").equalTo(email)
-//                    .addListenerForSingleValueEvent(object : ValueEventListener{
-//                        override fun onDataChange(snapshot: DataSnapshot) {
-//                            if(snapshot.exists()){
-//                                auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener { task ->
-//                                    if (task.isSuccessful) {
-////                                        Toast.makeText(applicationContext, "Welcome Admin", Toast.LENGTH_SHORT).show()
-//                                        val intent = Intent(this@LoginActivity, AdminDashboardActivity::class.java)
-//                                        startActivity(intent)
-//                                        loginBinding.buttonSignin.isClickable = true
-//                                        loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                                        finish()
-//                                    } else {
-//                                        Toast.makeText(applicationContext, task.exception?.localizedMessage.toString(), Toast.LENGTH_SHORT).show()
-//                                        loginBinding.buttonSignin.isClickable = true
-//                                        loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                                    }
-//                                }
-//                            }
-//                            else{
-//                                Toast.makeText(applicationContext, "Incorrect username or password", Toast.LENGTH_SHORT).show()
-//                                loginBinding.buttonSignin.isClickable = true
-//                                loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                            }
-//                        }
-//
-//                        override fun onCancelled(error: DatabaseError) {
-//                            TODO("Not yet implemented")
-//                        }
-//
-//                    })
-//            }
-//
-//            "Mess Contractor" -> {
-//                contractorReference.orderByChild("contractorEmail").equalTo(email)
-//                    .addListenerForSingleValueEvent(object : ValueEventListener{
-//                        override fun onDataChange(snapshot: DataSnapshot) {
-//                            if(snapshot.exists()){
-//                                auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener { task ->
-//                                    if (task.isSuccessful) {
-////                                        Toast.makeText(applicationContext, "Welcome", Toast.LENGTH_SHORT).show()
-//                                        val intent = Intent(this@LoginActivity, ContractorDashboard::class.java)
-//                                        intent.putExtra("userType",userType)
-//                                        startActivity(intent)
-//                                        loginBinding.buttonSignin.isClickable = true
-//                                        loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                                        finish()
-//                                    } else {
-//                                        Toast.makeText(applicationContext, task.exception?.localizedMessage.toString(), Toast.LENGTH_SHORT).show()
-//                                        loginBinding.buttonSignin.isClickable = true
-//                                        loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                                    }
-//                                }
-//                            }
-//                            else{
-//                                Toast.makeText(applicationContext, "Incorrect username or password", Toast.LENGTH_SHORT).show()
-//                                loginBinding.buttonSignin.isClickable = true
-//                                loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                            }
-//                        }
-//
-//                        override fun onCancelled(error: DatabaseError) {
-//                            TODO("Not yet implemented")
-//                        }
-//
-//                    })
-//
-//
-////                loginBinding.buttonSignin.isClickable = true
-////                loginBinding.progressBarLogin.visibility = View.INVISIBLE
-////                val intent = Intent(this@LoginActivity, ContractorDashboard::class.java)
-////                startActivity(intent)
-////                finish()
-//            }
-//            "" -> {
-//                loginBinding.buttonSignin.isClickable = true
-//                loginBinding.progressBarLogin.visibility = View.INVISIBLE
-//                Toast.makeText(applicationContext, "Select a user type", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//    }
+    private fun signinWithFirebase(email:String, pass:String, userType:String){
+        loginBinding.buttonSignin.isClickable = false
+        loginBinding.progressBarLogin.visibility = View.VISIBLE
+
+        when (userType) {
+            "Student" -> {
+                if (!checkConstraints(email)) {
+                    Toast.makeText(this@LoginActivity, "Enter a valid nitc email id", Toast.LENGTH_SHORT).show()
+                    loginBinding.buttonSignin.isClickable = true
+                    loginBinding.progressBarLogin.visibility = View.INVISIBLE
+                }
+                else {
+                    val map: HashMap<String, String> = HashMap()
+                    map["studentEmail"] = email
+                    map["studentPassword"] = pass
+                    map["userType"] = userType
+
+                    val loginService: AuthenticationServices = AuthenticationServiceBuilder.buildService(AuthenticationServices::class.java)
+                    val requestCall = loginService.loginStudent(map)
+
+                    requestCall.enqueue(object: Callback<Boolean>{
+                        override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                            if(response.code() == 400){
+                                Toast.makeText(applicationContext, "Incorrect username or password", Toast.LENGTH_SHORT).show()
+                                loginBinding.buttonSignin.isClickable = true
+                                loginBinding.progressBarLogin.visibility = View.INVISIBLE
+                            }
+                            else if(response.code() == 200){
+                                val sharedPreferences = this@LoginActivity.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
+                                val editor = sharedPreferences.edit()
+                                editor.putString("token",response.headers()["user-auth-token"].toString())
+                                editor.apply()
+
+                                val intent = Intent(this@LoginActivity, StudentDashboardActivity::class.java)
+                                intent.putExtra("userType", userType)
+                                startActivity(intent)
+
+                                loginBinding.buttonSignin.isClickable = true
+                                loginBinding.progressBarLogin.visibility = View.INVISIBLE
+
+                                finish()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                            Toast.makeText(applicationContext, t.localizedMessage?.toString(), Toast.LENGTH_SHORT).show()
+                            loginBinding.buttonSignin.isClickable = true
+                            loginBinding.progressBarLogin.visibility = View.INVISIBLE
+                        }
+
+                    })
+                }
+            }
+
+            "Admin" -> {
+                val map: HashMap<String, String> = HashMap()
+                map["adminEmail"] = email
+                map["adminPassword"] = pass
+                map["userType"] = userType
+
+                val loginService: AuthenticationServices = AuthenticationServiceBuilder.buildService(AuthenticationServices::class.java)
+                val requestCall = loginService.loginAdmin(map)
+
+                requestCall.enqueue(object: Callback<Boolean>{
+                    override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                        if(response.isSuccessful){
+                            val sharedPreferences = this@LoginActivity.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
+                            val editor = sharedPreferences.edit()
+                            editor.putString("token", response.headers()["user-auth-token"].toString())
+                            editor.apply()
+
+                            val intent = Intent(this@LoginActivity, AdminDashboardActivity::class.java)
+                            startActivity(intent)
+
+                            loginBinding.buttonSignin.isClickable = true
+                            loginBinding.progressBarLogin.visibility = View.INVISIBLE
+
+                            finish()
+                        }
+                        else{
+                            Toast.makeText(applicationContext, "Incorrect username or password", Toast.LENGTH_SHORT).show()
+                            loginBinding.buttonSignin.isClickable = true
+                            loginBinding.progressBarLogin.visibility = View.INVISIBLE
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                        Toast.makeText(applicationContext, t.localizedMessage?.toString(), Toast.LENGTH_SHORT).show()
+                        loginBinding.buttonSignin.isClickable = true
+                        loginBinding.progressBarLogin.visibility = View.INVISIBLE
+                    }
+
+                })
+            }
+
+            "Mess Contractor" -> {
+                val map: HashMap<String, String> = HashMap()
+                map["contractorEmail"] = email
+                map["contractorPassword"] = pass
+                map["userType"] = userType
+
+                val loginService: AuthenticationServices = AuthenticationServiceBuilder.buildService(AuthenticationServices::class.java)
+                val requestCall = loginService.loginContractor(map)
+
+                requestCall.enqueue(object: Callback<Boolean>{
+                    override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                        if(response.isSuccessful){
+                            val sharedPreferences = this@LoginActivity.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
+                            val editor = sharedPreferences.edit()
+                            editor.putString("token", response.headers()["user-auth-token"].toString())
+                            editor.apply()
+
+                            val intent = Intent(this@LoginActivity, ContractorDashboard::class.java)
+                            intent.putExtra("userType",userType)
+                            startActivity(intent)
+
+                            loginBinding.buttonSignin.isClickable = true
+                            loginBinding.progressBarLogin.visibility = View.INVISIBLE
+
+                            finish()
+                        }
+                        else{
+                            Toast.makeText(applicationContext, "Incorrect username or password", Toast.LENGTH_SHORT).show()
+                            loginBinding.buttonSignin.isClickable = true
+                            loginBinding.progressBarLogin.visibility = View.INVISIBLE
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                        Toast.makeText(applicationContext, t.localizedMessage?.toString(), Toast.LENGTH_SHORT).show()
+                        loginBinding.buttonSignin.isClickable = true
+                        loginBinding.progressBarLogin.visibility = View.INVISIBLE
+                    }
+
+                })
+            }
+
+            "" -> {
+                loginBinding.buttonSignin.isClickable = true
+                loginBinding.progressBarLogin.visibility = View.INVISIBLE
+                Toast.makeText(applicationContext, "Select a user type", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     private fun checkConstraints(email: String): Boolean {
         if(email.contains('_')) {

@@ -66,7 +66,7 @@ class ContractorDashboardFragment : Fragment() {
                 fragmentTransaction.addToBackStack(null)
                 fragmentTransaction.commit()
             }else{
-                Snackbar.make(contractorDashboardBinding.contractorDashboradLayout,"No student has been enrolled yet.",
+                Snackbar.make(contractorDashboardBinding.contractorDashboardLayout,"No student has been enrolled yet.",
                     Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
             }
         }
