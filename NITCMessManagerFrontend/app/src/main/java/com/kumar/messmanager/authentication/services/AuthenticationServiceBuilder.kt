@@ -6,7 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object AuthenticationServiceBuilder {
-    private const val URL = "http://192.168.116.103:3000"
+    private const val URL = "http://192.168.238.154:3000"
 
     private val logger: HttpLoggingInterceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
 

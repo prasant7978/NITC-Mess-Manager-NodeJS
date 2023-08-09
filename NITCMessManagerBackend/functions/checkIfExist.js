@@ -3,7 +3,7 @@ const Contractor = require('../models/contractor')
 const Admin = require('../models/admin')
 
 module.exports = async(email, userType) => {
-    if(userType == 'admin'){
+    if(userType == 'Admin'){
         const admin = await Admin.findOne({adminEmail: email}).exec();
         if(admin)
             return true
