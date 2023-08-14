@@ -254,7 +254,7 @@ class LoginActivity : AppCompatActivity() {
                 val map: HashMap<String, String> = HashMap()
                 map["contractorEmail"] = email
                 map["contractorPassword"] = pass
-                map["userType"] = userType
+                map["userType"] = "Contractor"
 
                 val loginService: AuthenticationServices = AuthenticationServiceBuilder.buildService(AuthenticationServices::class.java)
                 val requestCall = loginService.loginContractor(map)

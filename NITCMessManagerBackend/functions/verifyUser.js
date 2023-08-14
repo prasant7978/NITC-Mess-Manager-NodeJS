@@ -10,8 +10,8 @@ module.exports = async(user) => {
         else
             return admin.generateAuthToken()
     }
-    else if(user.userType === 'contractor'){
-        const contractor = await Contractor.findOne({contractorEmail: user.email, contractorPassword: user.password}).exec()
+    else if(user.userType === 'Contractor'){
+        const contractor = await Contractor.findOne({contractorEmail: user.contractorEmail, contractorPassword: user.contractorPassword}).exec()
         if(!contractor)
             return null
         else

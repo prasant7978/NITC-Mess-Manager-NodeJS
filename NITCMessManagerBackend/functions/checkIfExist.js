@@ -10,7 +10,7 @@ module.exports = async(email, userType) => {
         else
             return false
     }
-    else if(userType == 'contractor'){
+    else if(userType == 'Contractor'){
         const contractor = await Contractor.findOne({contractorEmail: email}).exec();
         if(contractor)
             return true
