@@ -50,7 +50,11 @@ class StudentDashboardActivity : AppCompatActivity() {
                 dialog.cancel()
             })
             dialog.setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which ->
-//                FirebaseAuth.getInstance().signOut()
+                val sharedPreferences = this@StudentDashboardActivity.getSharedPreferences("saveToken", MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                editor.remove("token")
+                editor.apply()
+
                 Toast.makeText(this,"Sign out is successfull", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this@StudentDashboardActivity, LoginActivity::class.java)
                 startActivity(intent)

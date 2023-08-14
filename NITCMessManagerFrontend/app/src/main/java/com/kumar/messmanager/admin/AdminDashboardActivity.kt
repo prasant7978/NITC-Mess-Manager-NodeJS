@@ -49,7 +49,11 @@ class AdminDashboardActivity : AppCompatActivity() {
                 dialog.cancel()
             })
             dialog.setPositiveButton("Yes",DialogInterface.OnClickListener { dialog, which ->
-//                FirebaseAuth.getInstance().signOut()
+                val sharedPreferences = this@AdminDashboardActivity.getSharedPreferences("saveToken", MODE_PRIVATE)
+                val editor = sharedPreferences.edit()
+                editor.remove("token")
+                editor.apply()
+
                 Toast.makeText(this,"Sign out is successfull", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this@AdminDashboardActivity, LoginActivity::class.java)
                 startActivity(intent)
