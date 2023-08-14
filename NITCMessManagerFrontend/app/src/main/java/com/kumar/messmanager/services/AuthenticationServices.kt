@@ -1,4 +1,4 @@
-package com.kumar.messmanager.authentication.services
+package com.kumar.messmanager.services
 
 import retrofit2.Call
 import retrofit2.http.Body

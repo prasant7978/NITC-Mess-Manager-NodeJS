@@ -4,8 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import com.kumar.messmanager.authentication.services.AuthenticationServiceBuilder
-import com.kumar.messmanager.authentication.services.AuthenticationServices
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.services.AuthenticationServices
 import com.kumar.messmanager.databinding.ActivitySignUpBinding
 import retrofit2.Call
 import retrofit2.Callback
@@ -57,7 +57,7 @@ class SignUpActivity : AppCompatActivity() {
         map["studentRollNo"] = roll
         map["userType"] = "Student"
 
-        val signupService: AuthenticationServices = AuthenticationServiceBuilder.buildService(AuthenticationServices::class.java)
+        val signupService: AuthenticationServices = ServiceBuilder.buildService(AuthenticationServices::class.java)
         val requestCall = signupService.singnupStudent(map)
 
         requestCall.enqueue(object: Callback<Boolean>{

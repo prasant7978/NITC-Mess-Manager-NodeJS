@@ -15,9 +15,7 @@ import com.kumar.messmanager.databinding.FragmentStudentDashboardBinding
 
 class StudentDashboardFragment : Fragment() {
 
-    lateinit var studentDashboardFragmentBinding: FragmentStudentDashboardBinding
-//    var db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    var ref = db.reference.child("students")
+    private lateinit var studentDashboardFragmentBinding: FragmentStudentDashboardBinding
     var messName : String = ""
     var studentName : String = ""
 

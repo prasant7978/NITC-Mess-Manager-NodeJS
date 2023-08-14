@@ -5,13 +5,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.content.Intent
 import android.graphics.Color
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.kumar.messmanager.R
 import com.kumar.messmanager.admin.AdminDashboardActivity
-import com.kumar.messmanager.authentication.services.AuthenticationServiceBuilder
-import com.kumar.messmanager.authentication.services.AuthenticationServices
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.services.AuthenticationServices
 import com.kumar.messmanager.contractor.ContractorDashboard
 import com.kumar.messmanager.databinding.ActivityLoginBinding
 import com.kumar.messmanager.student.StudentDashboardActivity
@@ -68,7 +67,7 @@ class LoginActivity : AppCompatActivity() {
             loginBinding.contractorLoginTypeImage.setBackgroundResource(R.drawable.login_type_shape)
             loginBinding.contractorLoginTypeButton.setTextColor(Color.WHITE)
 
-            userType = "Mess Contractor"
+            userType = "Contractor"
 
             loginBinding.textViewSignup.visibility = View.INVISIBLE
         }
@@ -95,65 +94,28 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-//    override fun onStart() {
-//        super.onStart()
-//
-//        val user = auth.currentUser
-//        if(user != null){
-//            val uid = user.uid
-//
-//            studentReference.orderByChild("studentId").equalTo(uid)
-//                .addListenerForSingleValueEvent(object : ValueEventListener{
-//                    override fun onDataChange(snapshot: DataSnapshot) {
-//                        if(snapshot.exists()){
-////                            Toast.makeText(applicationContext,"Welcome",Toast.LENGTH_SHORT).show()
-//                            if(auth.currentUser?.isEmailVerified == true) {
-//                                val intent =
-//                                    Intent(this@LoginActivity, StudentDashboardActivity::class.java)
-//                                startActivity(intent)
-//                                finish()
-//                            }
-//                        }
-//                    }
-//
-//                    override fun onCancelled(error: DatabaseError) {
-//                        TODO("Not yet implemented")
-//                    }
-//                })
-//
-//            adminReference.orderByChild("adminId").equalTo(uid)
-//                .addListenerForSingleValueEvent(object : ValueEventListener{
-//                    override fun onDataChange(snapshot: DataSnapshot) {
-//                        if(snapshot.exists()){
-////                            Toast.makeText(applicationContext,"Welcome",Toast.LENGTH_SHORT).show()
-//                            val intent = Intent(this@LoginActivity,AdminDashboardActivity::class.java)
-//                            startActivity(intent)
-//                            finish()
-//                        }
-//                    }
-//
-//                    override fun onCancelled(error: DatabaseError) {
-//                        TODO("Not yet implemented")
-//                    }
-//                })
-//
-//            contractorReference.orderByChild("contractorId").equalTo(uid)
-//                .addListenerForSingleValueEvent(object : ValueEventListener{
-//                    override fun onDataChange(snapshot: DataSnapshot) {
-//                        if(snapshot.exists()){
-////                            Toast.makeText(applicationContext,"Welcome",Toast.LENGTH_SHORT).show()
-//                            val intent = Intent(this@LoginActivity,ContractorDashboard::class.java)
-//                            startActivity(intent)
-//                            finish()
-//                        }
-//                    }
-//
-//                    override fun onCancelled(error: DatabaseError) {
-//                        TODO("Not yet implemented")
-//                    }
-//                })
-//        }
-//    }
+    override fun onStart() {
+        super.onStart()
+
+        val sharedPreferences = this@LoginActivity.getSharedPreferences("saveToken", MODE_PRIVATE)
+        val userType = sharedPreferences.getString("userType", "")
+
+        if(userType == "Student"){
+            val intent = Intent(this@LoginActivity, StudentDashboardActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+        else if(userType == "Contractor"){
+            val intent = Intent(this@LoginActivity, ContractorDashboard::class.java)
+            startActivity(intent)
+            finish()
+        }
+        else if(userType == "Admin"){
+            val intent = Intent(this@LoginActivity, AdminDashboardActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+    }
 
     private fun signinWithFirebase(email:String, pass:String, userType:String){
         loginBinding.buttonSignin.isClickable = false
@@ -172,7 +134,8 @@ class LoginActivity : AppCompatActivity() {
                     map["studentPassword"] = pass
                     map["userType"] = userType
 
-                    val loginService: AuthenticationServices = AuthenticationServiceBuilder.buildService(AuthenticationServices::class.java)
+                    val loginService: AuthenticationServices = ServiceBuilder.buildService(
+                        AuthenticationServices::class.java)
                     val requestCall = loginService.loginStudent(map)
 
                     requestCall.enqueue(object: Callback<Boolean>{
@@ -186,6 +149,7 @@ class LoginActivity : AppCompatActivity() {
                                 val sharedPreferences = this@LoginActivity.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
                                 val editor = sharedPreferences.edit()
                                 editor.putString("token",response.headers()["user-auth-token"].toString())
+                                editor.putString("userType", "Student")
                                 editor.apply()
 
                                 val intent = Intent(this@LoginActivity, StudentDashboardActivity::class.java)
@@ -215,7 +179,8 @@ class LoginActivity : AppCompatActivity() {
                 map["adminPassword"] = pass
                 map["userType"] = userType
 
-                val loginService: AuthenticationServices = AuthenticationServiceBuilder.buildService(AuthenticationServices::class.java)
+                val loginService: AuthenticationServices = ServiceBuilder.buildService(
+                    AuthenticationServices::class.java)
                 val requestCall = loginService.loginAdmin(map)
 
                 requestCall.enqueue(object: Callback<Boolean>{
@@ -224,6 +189,7 @@ class LoginActivity : AppCompatActivity() {
                             val sharedPreferences = this@LoginActivity.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
                             val editor = sharedPreferences.edit()
                             editor.putString("token", response.headers()["user-auth-token"].toString())
+                            editor.putString("userType", "Admin")
                             editor.apply()
 
                             val intent = Intent(this@LoginActivity, AdminDashboardActivity::class.java)
@@ -250,13 +216,14 @@ class LoginActivity : AppCompatActivity() {
                 })
             }
 
-            "Mess Contractor" -> {
+            "Contractor" -> {
                 val map: HashMap<String, String> = HashMap()
                 map["contractorEmail"] = email
                 map["contractorPassword"] = pass
-                map["userType"] = "Contractor"
+                map["userType"] = userType
 
-                val loginService: AuthenticationServices = AuthenticationServiceBuilder.buildService(AuthenticationServices::class.java)
+                val loginService: AuthenticationServices = ServiceBuilder.buildService(
+                    AuthenticationServices::class.java)
                 val requestCall = loginService.loginContractor(map)
 
                 requestCall.enqueue(object: Callback<Boolean>{
@@ -265,6 +232,7 @@ class LoginActivity : AppCompatActivity() {
                             val sharedPreferences = this@LoginActivity.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
                             val editor = sharedPreferences.edit()
                             editor.putString("token", response.headers()["user-auth-token"].toString())
+                            editor.putString("userType", "Contractor")
                             editor.apply()
 
                             val intent = Intent(this@LoginActivity, ContractorDashboard::class.java)

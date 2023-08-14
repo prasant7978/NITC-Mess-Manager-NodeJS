@@ -52,6 +52,7 @@ class AdminDashboardActivity : AppCompatActivity() {
                 val sharedPreferences = this@AdminDashboardActivity.getSharedPreferences("saveToken", MODE_PRIVATE)
                 val editor = sharedPreferences.edit()
                 editor.remove("token")
+                editor.remove("userType")
                 editor.apply()
 
                 Toast.makeText(this,"Sign out is successfull", Toast.LENGTH_SHORT).show()
