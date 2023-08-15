@@ -99,21 +99,100 @@ class LoginActivity : AppCompatActivity() {
 
         val sharedPreferences = this@LoginActivity.getSharedPreferences("saveToken", MODE_PRIVATE)
         val userType = sharedPreferences.getString("userType", "")
+        val token = sharedPreferences.getString("token", "")
 
-        if(userType == "Student"){
-            val intent = Intent(this@LoginActivity, StudentDashboardActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-        else if(userType == "Contractor"){
-            val intent = Intent(this@LoginActivity, ContractorDashboard::class.java)
-            startActivity(intent)
-            finish()
-        }
-        else if(userType == "Admin"){
-            val intent = Intent(this@LoginActivity, AdminDashboardActivity::class.java)
-            startActivity(intent)
-            finish()
+        val authenticationServices: AuthenticationServices = ServiceBuilder.buildService(AuthenticationServices::class.java)
+
+        if(token != "") {
+            if (userType == "Student") {
+                val requestCall = authenticationServices.validateToken(token.toString())
+                requestCall.enqueue(object : Callback<Boolean> {
+                    override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                        if (response.isSuccessful) {
+                            if (response.body() == true) {
+                                val intent =
+                                    Intent(this@LoginActivity, StudentDashboardActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
+                            else
+                                Toast.makeText(this@LoginActivity, "User not found", Toast.LENGTH_SHORT)
+                                    .show()
+                        }
+                        else
+                            Toast.makeText(this@LoginActivity, "No response from the server", Toast.LENGTH_SHORT)
+                                .show()
+                    }
+
+                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                        Toast.makeText(this@LoginActivity, "Server error...", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                })
+            }
+            else if (userType == "Contractor") {
+                val requestCall = authenticationServices.validateToken(token.toString())
+                requestCall.enqueue(object : Callback<Boolean> {
+                    override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                        if (response.isSuccessful) {
+                            if (response.body() == true) {
+                                val intent =
+                                    Intent(this@LoginActivity, ContractorDashboard::class.java)
+                                startActivity(intent)
+                                finish()
+                            } else
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Login Again...",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                        } else
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Server error...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                    }
+
+                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                        Toast.makeText(this@LoginActivity, "Server error...", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                })
+            }
+            else if (userType == "Admin") {
+                val requestCall = authenticationServices.validateToken(token.toString())
+                requestCall.enqueue(object : Callback<Boolean> {
+                    override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                        if (response.isSuccessful) {
+                            if (response.body() == true) {
+                                val intent =
+                                    Intent(this@LoginActivity, AdminDashboardActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            } else
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Login Again...",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                        } else
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Server error...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                    }
+
+                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                        Toast.makeText(this@LoginActivity, "Server error...", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                })
+            }
         }
     }
 

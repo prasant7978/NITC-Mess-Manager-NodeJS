@@ -16,7 +16,7 @@ import com.kumar.messmanager.databinding.ActivityStudentDashboardBinding
 
 class StudentDashboardActivity : AppCompatActivity() {
 
-    lateinit var dashboardBinding : ActivityStudentDashboardBinding
+    private lateinit var dashboardBinding : ActivityStudentDashboardBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

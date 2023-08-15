@@ -1,23 +1,32 @@
 package com.kumar.messmanager.student
 
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.kumar.messmanager.R
 import com.kumar.messmanager.contractor.ManageMessMenuFragment
 import com.kumar.messmanager.databinding.FragmentStudentDashboardBinding
+import com.kumar.messmanager.model.Student
+import com.kumar.messmanager.services.GetProfileService
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.viewmodels.SharedViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class StudentDashboardFragment : Fragment() {
 
     private lateinit var studentDashboardFragmentBinding: FragmentStudentDashboardBinding
+    private val sharedViewModel: SharedViewModel by activityViewModels()
     var messName : String = ""
-    var studentName : String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,27 +34,38 @@ class StudentDashboardFragment : Fragment() {
     ): View? {
         studentDashboardFragmentBinding = FragmentStudentDashboardBinding.inflate(inflater,container,false)
 
-//        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val sharedPreferences = this.activity?.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
+        var token = sharedPreferences?.getString("token", "")
 
-        var userType = ""
+        val profileService: GetProfileService = ServiceBuilder.buildService(GetProfileService::class.java)
+        val requestCall = profileService.getStudentProfileWithToken(token.toString())
 
-//        ref.orderByChild("studentId").equalTo(uid).addListenerForSingleValueEvent(object :
-//            ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for(ds in snapshot.children) {
-//                    Log.d("debug",ds.child("studentName").value.toString())
-//                    studentDashboardFragmentBinding.textViewName.text = ds.child("studentName").value.toString()
-//                    studentName = ds.child("studentName").value.toString()
-//                    messName = ds.child("messEnrolled").value.toString()
-//                    userType = ds.child("userType").value.toString()
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
+        requestCall.enqueue(object: Callback<Student> {
+            override fun onResponse(call: Call<Student>, response: Response<Student>) {
+                if(response.isSuccessful){
+                    if(response.body() != null) {
+                        val student = response.body()
+                        messName = student!!.messEnrolled
+                        studentDashboardFragmentBinding.textViewName.text = student.studentName
+
+                        sharedViewModel.student = student
+                        sharedViewModel.userType = student.userType
+                        sharedViewModel.token = token.toString()
+                    }
+                    else{
+                        Toast.makeText(context, "Student not found...", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                else{
+                    Toast.makeText(context, "Some error occurred...", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Student>, t: Throwable) {
+                Toast.makeText(context, "Server error...", Toast.LENGTH_SHORT).show()
+            }
+
+        })
 
         studentDashboardFragmentBinding.studentProfile.setOnClickListener {
             val fragmentManager : FragmentManager = requireActivity().supportFragmentManager
@@ -62,11 +82,6 @@ class StudentDashboardFragment : Fragment() {
             val fragmentTransaction : FragmentTransaction = fragmentManager.beginTransaction()
             val showMessListFragment = ShowMessListFragment()
 
-            val bundle = Bundle()
-            bundle.putString("userType",userType)
-
-            showMessListFragment.arguments = bundle
-
             fragmentTransaction.replace(R.id.frameLayout,showMessListFragment)
             fragmentTransaction.addToBackStack(null)
             fragmentTransaction.commit()
@@ -81,12 +96,6 @@ class StudentDashboardFragment : Fragment() {
                 val fragmentManager: FragmentManager = requireActivity().supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
                 val manageMessMenuFragment = ManageMessMenuFragment()
-
-                val bundle = Bundle()
-                bundle.putString("userType", userType)
-                bundle.putString("messName", messName)
-
-                manageMessMenuFragment.arguments = bundle
 
                 fragmentTransaction.replace(R.id.frameLayout, manageMessMenuFragment)
                 fragmentTransaction.addToBackStack(null)
@@ -110,15 +119,9 @@ class StudentDashboardFragment : Fragment() {
                     Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
             }
             else {
-                val bundle = Bundle()
-                bundle.putString("studentName",studentName)
-                bundle.putString("messName",messName)
-
                 val fragmentManager : FragmentManager = requireActivity().supportFragmentManager
                 val fragmentTransaction : FragmentTransaction = fragmentManager.beginTransaction()
                 val studentFeedbackFragment = StudentFeedbackFragment()
-
-                studentFeedbackFragment.arguments = bundle
 
                 fragmentTransaction.replace(R.id.frameLayout,studentFeedbackFragment)
                 fragmentTransaction.addToBackStack(null)

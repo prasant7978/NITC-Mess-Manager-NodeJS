@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.kumar.messmanager"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.kumar.messmanager"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -45,6 +45,9 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.0")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation ("pl.droidsonroids.gif:android-gif-drawable:1.2.17")

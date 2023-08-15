@@ -7,6 +7,10 @@ const loginAdmin = require('../controllers/admin/loginAdmin')
 
 const signupStudent = require('../controllers/student/signupStudent')
 
+const verifyToken = require('../functions/verifyToken')
+
+router.get('/verifyToken', verifyToken)
+
 router.post('/signup/student', signupStudent)
 
 router.post('/login/student', loginStudent)
