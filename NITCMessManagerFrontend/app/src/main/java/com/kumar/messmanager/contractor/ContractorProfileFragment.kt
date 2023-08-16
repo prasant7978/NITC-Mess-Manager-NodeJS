@@ -5,16 +5,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
-import com.kumar.messmanager.R
 import com.kumar.messmanager.databinding.FragmentContractorProfileBinding
 import com.kumar.messmanager.model.Contractor
+import com.kumar.messmanager.viewmodels.SharedViewModel
 
 class ContractorProfileFragment : Fragment() {
 
-    lateinit var contractorProfileBinding: FragmentContractorProfileBinding
-//    val db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    val reference = db.reference.child("contractors")
+    private lateinit var contractorProfileBinding: FragmentContractorProfileBinding
+    private val sharedViewModel: SharedViewModel by activityViewModels()
 
     private var uid = ""
     lateinit var contractor : Contractor
@@ -26,9 +26,7 @@ class ContractorProfileFragment : Fragment() {
     ): View? {
         contractorProfileBinding = FragmentContractorProfileBinding.inflate(inflater,container,false)
 
-//        uid = FirebaseAuth.getInstance().currentUser?.uid.toString()
-
-//        retrieveDetailsFromDb(uid)
+        retrieveDetailsFromDb()
 
         contractorProfileBinding.textInputAvailability.isEnabled = false
         contractorProfileBinding.textInputContractorEmail.isEnabled = false
@@ -52,36 +50,27 @@ class ContractorProfileFragment : Fragment() {
                 Snackbar.make(contractorProfileBinding.linearLayout,"Cost per day can't be zero or negative",Snackbar.LENGTH_SHORT).setAction("close",View.OnClickListener {  }).show()
             }
             else {
-                updateContractorDetails()
+//                updateContractorDetails()
             }
         }
 
         return contractorProfileBinding.root
     }
 
-//    private fun retrieveDetailsFromDb(uid:String) {
-//        reference.orderByChild("contractorId").equalTo(uid).addValueEventListener(object:
-//            ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for(ds in snapshot.children){
-//                    contractorProfileBinding.textInputContractorName.setText(ds.child("contractorName").value.toString())
-//                    contractorProfileBinding.textInputContractorEmail.setText(ds.child("contractorEmail").value.toString())
-//                    contractorProfileBinding.textInputContractorPass.setText(ds.child("contractorPassword").value.toString())
-//                    contractorProfileBinding.textInputMessName.setText(ds.child("messName").value.toString())
-//                    contractorProfileBinding.textInputCostPerDay.setText(ds.child("costPerDay").value.toString())
-//                    contractorProfileBinding.textInputFoodType.setText(ds.child("foodType").value.toString())
-//                    contractorProfileBinding.textInputCapacity.setText(ds.child("capacity").value.toString())
-//                    contractorProfileBinding.textInputAvailability.setText(ds.child("availability").value.toString())
-//                    slotFilled = ds.child("capacity").value.toString().toInt() - ds.child("availability").value.toString().toInt()
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
+    private fun retrieveDetailsFromDb() {
+        val contractor = sharedViewModel.contractor
+
+        contractorProfileBinding.textInputContractorName.setText(contractor.contractorName)
+        contractorProfileBinding.textInputContractorEmail.setText(contractor.contractorEmail)
+        contractorProfileBinding.textInputContractorPass.setText(contractor.contractorPassword)
+        contractorProfileBinding.textInputMessName.setText(contractor.messName)
+        contractorProfileBinding.textInputCostPerDay.setText(contractor.costPerDay.toString())
+        contractorProfileBinding.textInputFoodType.setText(contractor.foodType)
+        contractorProfileBinding.textInputCapacity.setText(contractor.capacity.toString())
+        contractorProfileBinding.textInputAvailability.setText(contractor.availability.toString())
+
+        slotFilled = contractor.capacity - contractor.availability
+    }
 
     private fun updateContractorDetails() {
         contractorProfileBinding.buttonUpdateContractor.isClickable = false
