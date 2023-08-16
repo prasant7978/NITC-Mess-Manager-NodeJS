@@ -16,7 +16,7 @@ import com.kumar.messmanager.databinding.ActivityContractorDashboardBinding
 
 class ContractorDashboard : AppCompatActivity() {
 
-    lateinit var contractorDashboardBinding: ActivityContractorDashboardBinding
+    private lateinit var contractorDashboardBinding: ActivityContractorDashboardBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,16 +26,16 @@ class ContractorDashboard : AppCompatActivity() {
 
         setContentView(view)
 
-        val userType = intent.getStringExtra("userType")
+//        val userType = intent.getStringExtra("userType")
 
         val fragmentManager : FragmentManager = supportFragmentManager
         val fragmentTransaction : FragmentTransaction = fragmentManager.beginTransaction()
         val contractorDashboardFragment = ContractorDashboardFragment()
 
-        val bundle = Bundle()
-        bundle.putString("userType",userType)
-
-        contractorDashboardFragment.arguments = bundle
+//        val bundle = Bundle()
+//        bundle.putString("userType",userType)
+//
+//        contractorDashboardFragment.arguments = bundle
 
         fragmentTransaction.add(R.id.frameLayout,contractorDashboardFragment)
         fragmentTransaction.commit()

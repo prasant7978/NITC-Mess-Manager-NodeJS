@@ -1,23 +1,31 @@
 package com.kumar.messmanager.contractor
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.kumar.messmanager.R
 import com.kumar.messmanager.databinding.FragmentContractorDashboardBinding
 import com.kumar.messmanager.model.Contractor
+import com.kumar.messmanager.services.GetProfileService
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.viewmodels.SharedViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ContractorDashboardFragment : Fragment() {
 
-    lateinit var contractorDashboardBinding: FragmentContractorDashboardBinding
-//    var db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    var ref = db.reference.child("contractors")
-    var noOfEnrolledStudent = 0
+    private lateinit var contractorDashboardBinding: FragmentContractorDashboardBinding
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private var noOfEnrolledStudent = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,11 +33,7 @@ class ContractorDashboardFragment : Fragment() {
     ): View? {
         contractorDashboardBinding = FragmentContractorDashboardBinding.inflate(inflater,container,false)
 
-//        val uid = FirebaseAuth.getInstance().currentUser?.uid.toString()
-
-        val userType = arguments?.getString("userType")
-
-//        retrieveContractorInfo(uid)
+        retrieveContractorInfo()
 
         contractorDashboardBinding.profile.setOnClickListener {
             val fragmentManager : FragmentManager = requireActivity().supportFragmentManager
@@ -45,11 +49,6 @@ class ContractorDashboardFragment : Fragment() {
             val fragmentManager : FragmentManager = requireActivity().supportFragmentManager
             val fragmentTransaction : FragmentTransaction = fragmentManager.beginTransaction()
             val manageMessMenuFragment = ManageMessMenuFragment()
-
-            val bundle = Bundle()
-            bundle.putString("usertype",userType)
-
-            manageMessMenuFragment.arguments = bundle
 
             fragmentTransaction.replace(R.id.frameLayout,manageMessMenuFragment)
             fragmentTransaction.addToBackStack(null)
@@ -94,24 +93,36 @@ class ContractorDashboardFragment : Fragment() {
         return contractorDashboardBinding.root
     }
 
-//    private fun retrieveContractorInfo(uid : String){
-//        ref.orderByChild("contractorId").equalTo(uid).addListenerForSingleValueEvent(object  :
-//            ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for(ds in snapshot.children){
-//                    val contractor = ds.getValue(Contractor::class.java)
-//                    if(contractor != null){
-//                        noOfEnrolledStudent = contractor.studentEnrolled.size
-//                        contractorDashboardBinding.textViewContractorName.setText(contractor.contractorName.toString())
-//                    }
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
+    private fun retrieveContractorInfo(){
+        val sharedPreferences = this.activity?.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
+        val token = sharedPreferences?.getString("token", "")
 
+        val profileService: GetProfileService = ServiceBuilder.buildService(GetProfileService::class.java)
+        val requestCall = profileService.getContractorProfileWithToken(token.toString())
+
+        requestCall.enqueue(object: Callback<Contractor>{
+            override fun onResponse(call: Call<Contractor>, response: Response<Contractor>) {
+                if(response.isSuccessful){
+                    if(response.body() != null){
+                        val contractor = response.body()
+                        noOfEnrolledStudent = contractor!!.studentEnrolled.size
+                        contractorDashboardBinding.textViewContractorName.text = contractor.contractorName
+
+                        sharedViewModel.contractor = contractor
+                        sharedViewModel.userType = contractor.userType
+                        sharedViewModel.token = token.toString()
+                    }
+                    else
+                        Toast.makeText(context, "Contractor not found...", Toast.LENGTH_SHORT).show()
+                }
+                else
+                    Toast.makeText(context, "Some error occurred...", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFailure(call: Call<Contractor>, t: Throwable) {
+                TODO("Not yet implemented")
+            }
+
+        })
+    }
 }
