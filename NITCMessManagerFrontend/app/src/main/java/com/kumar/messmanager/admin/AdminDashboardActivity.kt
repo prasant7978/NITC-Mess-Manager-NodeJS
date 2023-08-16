@@ -16,7 +16,7 @@ import com.kumar.messmanager.authentication.LoginActivity
 
 class AdminDashboardActivity : AppCompatActivity() {
 
-    lateinit var adminDashboardBinding: ActivityAdminDashboardBinding
+    private lateinit var adminDashboardBinding: ActivityAdminDashboardBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
