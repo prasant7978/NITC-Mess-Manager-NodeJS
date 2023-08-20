@@ -15,7 +15,7 @@ import com.kumar.messmanager.R
 import com.kumar.messmanager.contractor.ManageMessMenuFragment
 import com.kumar.messmanager.databinding.FragmentStudentDashboardBinding
 import com.kumar.messmanager.model.Student
-import com.kumar.messmanager.services.GetProfileService
+import com.kumar.messmanager.services.ProfileService
 import com.kumar.messmanager.services.ServiceBuilder
 import com.kumar.messmanager.viewmodels.SharedViewModel
 import retrofit2.Call
@@ -37,7 +37,7 @@ class StudentDashboardFragment : Fragment() {
         val sharedPreferences = this.activity?.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
         var token = sharedPreferences?.getString("token", "")
 
-        val profileService: GetProfileService = ServiceBuilder.buildService(GetProfileService::class.java)
+        val profileService: ProfileService = ServiceBuilder.buildService(ProfileService::class.java)
         val requestCall = profileService.getStudentProfileWithToken(token.toString())
 
         requestCall.enqueue(object: Callback<Student> {
