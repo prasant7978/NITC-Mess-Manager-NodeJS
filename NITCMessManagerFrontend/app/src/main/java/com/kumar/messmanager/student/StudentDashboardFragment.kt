@@ -17,7 +17,12 @@ import com.kumar.messmanager.databinding.FragmentStudentDashboardBinding
 import com.kumar.messmanager.model.Student
 import com.kumar.messmanager.services.ProfileService
 import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.student.access.GetProfileAccess
 import com.kumar.messmanager.viewmodels.SharedViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -34,38 +39,17 @@ class StudentDashboardFragment : Fragment() {
     ): View? {
         studentDashboardFragmentBinding = FragmentStudentDashboardBinding.inflate(inflater,container,false)
 
-        val sharedPreferences = this.activity?.getSharedPreferences("saveToken", Context.MODE_PRIVATE)
-        var token = sharedPreferences?.getString("token", "")
+        val getProfileAccess = GetProfileAccess(this)
+        val getStudentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
-        val profileService: ProfileService = ServiceBuilder.buildService(ProfileService::class.java)
-        val requestCall = profileService.getStudentProfileWithToken(token.toString())
-
-        requestCall.enqueue(object: Callback<Student> {
-            override fun onResponse(call: Call<Student>, response: Response<Student>) {
-                if(response.isSuccessful){
-                    if(response.body() != null) {
-                        val student = response.body()
-                        messName = student!!.messEnrolled
-                        studentDashboardFragmentBinding.textViewName.text = student.studentName
-
-                        sharedViewModel.student = student
-                        sharedViewModel.userType = student.userType
-                        sharedViewModel.token = token.toString()
-                    }
-                    else{
-                        Toast.makeText(context, "Student not found...", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                else{
-                    Toast.makeText(context, "Some error occurred...", Toast.LENGTH_SHORT).show()
-                }
+        getStudentCoroutineScope.launch {
+            val student = getProfileAccess.retrieveStudentInfo(sharedViewModel)
+            if(student != null) {
+                studentDashboardFragmentBinding.textViewName.text = student.studentName
             }
 
-            override fun onFailure(call: Call<Student>, t: Throwable) {
-                Toast.makeText(context, "Server error...", Toast.LENGTH_SHORT).show()
-            }
-
-        })
+            getStudentCoroutineScope.cancel()
+        }
 
         studentDashboardFragmentBinding.studentProfile.setOnClickListener {
             val fragmentManager : FragmentManager = requireActivity().supportFragmentManager
