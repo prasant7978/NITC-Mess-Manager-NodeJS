@@ -55,7 +55,7 @@ class GetProfileAccess(
                 override fun onFailure(call: Call<Contractor>, t: Throwable) {
                     Toast.makeText(
                         parentFragment.activity,
-                        "Server Error",
+                        t.localizedMessage,
                         Toast.LENGTH_SHORT
                     ).show()
                     continuation.resume(null)

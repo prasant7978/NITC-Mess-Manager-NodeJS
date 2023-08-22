@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const verifyToken = require('../middleware/verifyTokenMiddleware')
 const getStudent = require('../controllers/student/getStudent')
-const getContractor = require('../controllers/contractor/getContractor')
+const getContractor = require('../controllers/contractor/getContractorProfile')
 const getAdmin = require('../controllers/admin/getAdmin')
 const updateContractor = require('../controllers/contractor/updateContractor')
 

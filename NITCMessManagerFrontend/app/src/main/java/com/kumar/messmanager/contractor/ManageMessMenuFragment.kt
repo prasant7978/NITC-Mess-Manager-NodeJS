@@ -9,15 +9,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
+import com.kumar.messmanager.GetMenuAccess
+import com.kumar.messmanager.contractor.access.GetProfileAccess
 import com.kumar.messmanager.databinding.FragmentManageMessMenuBinding
+import com.kumar.messmanager.model.Contractor
+import com.kumar.messmanager.model.Menu
+import com.kumar.messmanager.model.Student
+import com.kumar.messmanager.services.MessMenuServices
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.viewmodels.SharedViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ManageMessMenuFragment : Fragment() {
 
-    lateinit var manageMessMenuBinding: FragmentManageMessMenuBinding
-//    val db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    val reference = db.reference.child("contractors")
-    var days  : Array<String> = arrayOf("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")
-    var previousSelectedIndex = 0
+    private lateinit var manageMessMenuBinding: FragmentManageMessMenuBinding
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private lateinit var contractor: Contractor
+    private lateinit var student: Student
+    private var days  : Array<String> = arrayOf("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday")
+    private var previousSelectedIndex = 0
+    var menu: Menu? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,9 +43,7 @@ class ManageMessMenuFragment : Fragment() {
     ): View? {
         manageMessMenuBinding = FragmentManageMessMenuBinding.inflate(inflater,container,false)
 
-//        val uid = FirebaseAuth.getInstance().currentUser?.uid.toString()
-
-        val userType = arguments?.getString("userType")
+        val userType = sharedViewModel.userType
         var messName = ""
 
         if(userType == "Student"){
@@ -39,15 +55,15 @@ class ManageMessMenuFragment : Fragment() {
             manageMessMenuBinding.textInputDinnerDetails.isEnabled = false
             manageMessMenuBinding.buttonUpdateMenu.visibility = View.GONE
 
-            messName = arguments?.getString("messName").toString()
-
-//            Log.d("menu",userType)
-//            Log.d("menu",messName)
+            student = sharedViewModel.student
+            messName = student.messEnrolled
 
 //            fetchMessMenuForStudent(messName, days[previousSelectedIndex])
         }
         else {
-//            fetchMessMenu(uid, days[previousSelectedIndex])
+            contractor = sharedViewModel.contractor
+            messName = contractor.messName
+            fetchMessMenu(messName, days[previousSelectedIndex])
         }
 
         manageMessMenuBinding.buttonSelectDay.setOnClickListener {
@@ -61,9 +77,8 @@ class ManageMessMenuFragment : Fragment() {
                     if(userType == "Student"){
 //                        fetchMessMenuForStudent(messName, days[previousSelectedIndex])
                     }
-                    else {
-//                        fetchMessMenu(uid, selectedDay)
-                    }
+                    else
+                        fetchMessMenu(messName, selectedDay)
 
                     dialog.dismiss()
                 }
@@ -74,9 +89,8 @@ class ManageMessMenuFragment : Fragment() {
                     if(userType == "Student"){
 //                        fetchMessMenuForStudent(messName, days[previousSelectedIndex])
                     }
-                    else {
-//                        fetchMessMenu(uid, selectedDay)
-                    }
+                    else
+                        fetchMessMenu(messName, selectedDay)
 
                     dialog.dismiss()
                 }
@@ -102,7 +116,7 @@ class ManageMessMenuFragment : Fragment() {
                 })
                 dialog.setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which ->
                     Log.d("menu","update called")
-//                    updateMessMenu(uid,breakfast,lunch,dinner,days[previousSelectedIndex],previousSelectedIndex)
+                    updateMessMenu(breakfast,lunch,dinner,days[previousSelectedIndex],previousSelectedIndex, messName)
                 })
                 dialog.create().show()
             }
@@ -111,7 +125,53 @@ class ManageMessMenuFragment : Fragment() {
         return manageMessMenuBinding.root
     }
 
-//    private fun updateMessMenu(uid: String, breakfast: String, lunch: String, dinner: String, selectedDay: String,dayIndex:Int) {
+    private fun updateMessMenu(breakfast: String, lunch: String, dinner: String, selectedDay: String, dayIndex:Int, messName: String) {
+        val map: HashMap<String, String> = HashMap()
+        if(menu != null)
+            map["_id"] = menu!!._id.toString()
+        map["day"] = selectedDay
+        map["breakfast"] = breakfast
+        map["lunch"] = lunch
+        map["dinner"] = dinner
+
+        val token = sharedViewModel.token
+        val messMenuServices: MessMenuServices = ServiceBuilder.buildService(MessMenuServices::class.java)
+        val requestCall = messMenuServices.updateMenu(map, token)
+
+        requestCall.enqueue(object: Callback<Boolean>{
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if(response.isSuccessful){
+                    fetchMessMenu(messName, selectedDay)
+                }
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                TODO("Not yet implemented")
+            }
+
+        })
+
+//        var flag = false
+//        val menuList = contractor.messMenu
+//        for(menu in menuList){
+//            if(menu.day == selectedDay){
+//                flag = true
+//                menu.breakfast = breakfast
+//                menu.lunch = lunch
+//                menu.dinner = dinner
+//                break
+//            }
+//        }
+//
+//        if(!flag)
+//                reference.child(uid).child("messMenu").child("$dayIndex").setValue(Menu(selectedDay,breakfast,lunch,dinner))
+//        else {
+//            contractor.messMenu = menuList
+////                reference.child(contractor.contractorId).setValue(contractor)
+//        }
+
+        //        fetchMessMenu(uid,selectedDay)
+
 //        reference.child(uid).addListenerForSingleValueEvent(object : ValueEventListener{
 //            override fun onDataChange(snapshot: DataSnapshot) {
 //                val contractor = snapshot.getValue(Contractor::class.java)
@@ -153,43 +213,32 @@ class ManageMessMenuFragment : Fragment() {
 //            }
 //
 //        })
-//    }
+    }
 
-//    private fun fetchMessMenu(uid : String, selectedDay: String) {
-//        manageMessMenuBinding.textInputBreakfastDetails.setText("")
-//        manageMessMenuBinding.textInputLunchDetails.setText("")
-//        manageMessMenuBinding.textInputDinnerDetails.setText("")
-//
-//        reference.child(uid).addListenerForSingleValueEvent(object : ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val contractor = snapshot.getValue(Contractor::class.java)
-//                if(contractor != null){
-//                    val menuList = contractor.messMenu
-//                    if(menuList.isNotEmpty()) {
-//                        for (menu in menuList) {
-//                            if (menu.day == selectedDay) {
-//                                manageMessMenuBinding.textInputBreakfastDetails.setText(menu.breakfast)
-//                                manageMessMenuBinding.textInputLunchDetails.setText(menu.lunch)
-//                                manageMessMenuBinding.textInputDinnerDetails.setText(menu.dinner)
-//                                break
-//                            }
-//                        }
-//                    }
-//                    else{
-//                        manageMessMenuBinding.textInputBreakfastDetails.setText("")
-//                        manageMessMenuBinding.textInputLunchDetails.setText("")
-//                        manageMessMenuBinding.textInputDinnerDetails.setText("")
-//                        Toast.makeText(activity,"You don't have any mess menu",Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
+    private fun fetchMessMenu(messName: String, selectedDay: String) {
+        manageMessMenuBinding.textInputBreakfastDetails.setText("")
+        manageMessMenuBinding.textInputLunchDetails.setText("")
+        manageMessMenuBinding.textInputDinnerDetails.setText("")
+
+        val getMenuAccess = GetMenuAccess(this)
+        val getMenuCoroutineScope = CoroutineScope(Dispatchers.Main)
+
+        getMenuCoroutineScope.launch {
+            menu = getMenuAccess.retrieveMessMenu(messName, sharedViewModel, selectedDay)
+            if(menu != null) {
+                manageMessMenuBinding.textInputBreakfastDetails.setText(menu!!.breakfast)
+                manageMessMenuBinding.textInputLunchDetails.setText(menu!!.lunch)
+                manageMessMenuBinding.textInputDinnerDetails.setText(menu!!.dinner)
+            }
+            else{
+                manageMessMenuBinding.textInputBreakfastDetails.setText("")
+                manageMessMenuBinding.textInputLunchDetails.setText("")
+                manageMessMenuBinding.textInputDinnerDetails.setText("")
+//                Toast.makeText(activity,"No menu have been added for $selectedDay", Toast.LENGTH_SHORT).show()
+            }
+            getMenuCoroutineScope.cancel()
+        }
+    }
 
 //    private fun fetchMessMenuForStudent(messName : String, selectedDay: String) {
 //        manageMessMenuBinding.textInputBreakfastDetails.setText("")

@@ -19,6 +19,9 @@ app.use('/auth', authenticationRouter)
 const getProfileRouter = require("./routes/profile.js")
 app.use('/getProfile', getProfileRouter)
 
+const messMenuRouter = require("./routes/messMenu.js")
+app.use('/messMenu', messMenuRouter)
+
 app.listen(3000, '192.168.238.154', () => {
     console.log("listening on port 3000 ...")
 })
