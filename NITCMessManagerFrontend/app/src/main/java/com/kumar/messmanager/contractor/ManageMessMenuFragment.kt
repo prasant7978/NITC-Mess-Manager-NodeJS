@@ -57,8 +57,10 @@ class ManageMessMenuFragment : Fragment() {
 
             student = sharedViewModel.student
             messName = student.messEnrolled
+            if(messName == "")
+                messName = arguments?.getString("messName").toString()
 
-//            fetchMessMenuForStudent(messName, days[previousSelectedIndex])
+            fetchMessMenu(messName, days[previousSelectedIndex])
         }
         else {
             contractor = sharedViewModel.contractor
@@ -72,11 +74,9 @@ class ManageMessMenuFragment : Fragment() {
                 .setSingleChoiceItems(days,previousSelectedIndex) { dialog, selectedIndex ->
                     val selectedDay = days[selectedIndex]
                     previousSelectedIndex = selectedIndex
-//                    manageMessMenuBinding.buttonSelectDay.text = selectedDay
                     manageMessMenuBinding.textViewSelectedDay.text = selectedDay
-                    if(userType == "Student"){
-//                        fetchMessMenuForStudent(messName, days[previousSelectedIndex])
-                    }
+                    if(userType == "Student")
+                        fetchMessMenu(messName, days[previousSelectedIndex])
                     else
                         fetchMessMenu(messName, selectedDay)
 
@@ -84,11 +84,9 @@ class ManageMessMenuFragment : Fragment() {
                 }
                 .setPositiveButton("Ok"){dialog, which->
                     val selectedDay = days[0]
-//                    manageMessMenuBinding.buttonSelectDay.text = selectedDay
                     manageMessMenuBinding.textViewSelectedDay.text = selectedDay
-                    if(userType == "Student"){
-//                        fetchMessMenuForStudent(messName, days[previousSelectedIndex])
-                    }
+                    if(userType == "Student")
+                        fetchMessMenu(messName, days[previousSelectedIndex])
                     else
                         fetchMessMenu(messName, selectedDay)
 
@@ -151,68 +149,6 @@ class ManageMessMenuFragment : Fragment() {
 
         })
 
-//        var flag = false
-//        val menuList = contractor.messMenu
-//        for(menu in menuList){
-//            if(menu.day == selectedDay){
-//                flag = true
-//                menu.breakfast = breakfast
-//                menu.lunch = lunch
-//                menu.dinner = dinner
-//                break
-//            }
-//        }
-//
-//        if(!flag)
-//                reference.child(uid).child("messMenu").child("$dayIndex").setValue(Menu(selectedDay,breakfast,lunch,dinner))
-//        else {
-//            contractor.messMenu = menuList
-////                reference.child(contractor.contractorId).setValue(contractor)
-//        }
-
-        //        fetchMessMenu(uid,selectedDay)
-
-//        reference.child(uid).addListenerForSingleValueEvent(object : ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                val contractor = snapshot.getValue(Contractor::class.java)
-//                if(contractor != null){
-////                    Log.d("menu","contractor found")
-//                    var flag = false
-//
-//                    val menuList = contractor.messMenu
-//
-//                    for(menu in menuList){
-//                        if(menu.day == selectedDay){
-//                            flag = true
-//                            menu.breakfast = breakfast
-//                            menu.lunch = lunch
-//                            menu.dinner = dinner
-////                            Log.d("menu", menu.day)
-////                            Log.d("menu", menu.breakfast)
-////                            Log.d("menu", menu.lunch)
-////                            Log.d("menu", menu.dinner)
-//                            break
-//                        }
-//                    }
-//
-//                    if(!flag)
-//                        reference.child(uid).child("messMenu").child("$dayIndex").setValue(Menu(selectedDay,breakfast,lunch,dinner))
-//                    else {
-//                        contractor.messMenu = menuList
-//                        reference.child(contractor.contractorId).setValue(contractor)
-//                    }
-//
-//                }
-////                Log.d("menu",uid)
-////                Log.d("menu",selectedDay)
-//                fetchMessMenu(uid,selectedDay)
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
     }
 
     private fun fetchMessMenu(messName: String, selectedDay: String) {
@@ -239,48 +175,5 @@ class ManageMessMenuFragment : Fragment() {
             getMenuCoroutineScope.cancel()
         }
     }
-
-//    private fun fetchMessMenuForStudent(messName : String, selectedDay: String) {
-//        manageMessMenuBinding.textInputBreakfastDetails.setText("")
-//        manageMessMenuBinding.textInputLunchDetails.setText("")
-//        manageMessMenuBinding.textInputDinnerDetails.setText("")
-//
-//        reference.orderByChild("messName").equalTo(messName).addListenerForSingleValueEvent(object : ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for(ds in snapshot.children){
-//                    val contractor = ds.getValue(Contractor::class.java)
-//                    if(contractor != null) {
-//                        val menuList = contractor.messMenu
-//                        if (menuList.isNotEmpty()) {
-//                            for (menu in menuList) {
-//                                if (menu.day == selectedDay) {
-//                                    manageMessMenuBinding.textInputBreakfastDetails.setText(menu.breakfast)
-//                                    manageMessMenuBinding.textInputLunchDetails.setText(menu.lunch)
-//                                    manageMessMenuBinding.textInputDinnerDetails.setText(menu.dinner)
-//                                    break
-//                                }
-//                            }
-//                        } else {
-//                            manageMessMenuBinding.textInputBreakfastDetails.setText("")
-//                            manageMessMenuBinding.textInputLunchDetails.setText("")
-//                            manageMessMenuBinding.textInputDinnerDetails.setText("")
-//                            Toast.makeText(
-//                                activity,
-//                                "No menu have been added for $selectedDay",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//                        }
-//                    }
-//
-//                }
-//
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
 
 }

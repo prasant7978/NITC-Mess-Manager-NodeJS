@@ -17,6 +17,6 @@ data class Contractor(var contractorId : String = "",
                       var totalDue : Int = 0,
                       var messMenu : ArrayList<Menu> = ArrayList(),
                       var feedbackReceived : ArrayList<Feedback> = ArrayList(),
-                      var studentEnrolled : ArrayList<Student> = ArrayList()
+                      var studentEnrolled : ArrayList<String> = ArrayList()
 ) {
 }

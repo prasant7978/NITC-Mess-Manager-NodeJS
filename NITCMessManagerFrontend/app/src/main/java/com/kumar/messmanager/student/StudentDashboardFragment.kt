@@ -43,9 +43,11 @@ class StudentDashboardFragment : Fragment() {
         val getStudentCoroutineScope = CoroutineScope(Dispatchers.Main)
 
         getStudentCoroutineScope.launch {
-            val student = getProfileAccess.retrieveStudentInfo(sharedViewModel)
+            val student: Student? = getProfileAccess.retrieveStudentInfo(sharedViewModel)
             if(student != null) {
                 studentDashboardFragmentBinding.textViewName.text = student.studentName
+                if(student.messEnrolled != "")
+                    messName = student.messEnrolled
             }
 
             getStudentCoroutineScope.cancel()

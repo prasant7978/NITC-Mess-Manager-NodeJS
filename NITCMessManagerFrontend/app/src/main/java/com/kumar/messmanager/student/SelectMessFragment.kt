@@ -1,25 +1,37 @@
 package com.kumar.messmanager.student
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.kumar.messmanager.R
 import com.kumar.messmanager.contractor.ManageMessMenuFragment
+import com.kumar.messmanager.contractor.access.GetProfileAccess
 import com.kumar.messmanager.databinding.FragmentSelectMessBinding
+import com.kumar.messmanager.services.ProfileService
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.viewmodels.SharedViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SelectMessFragment : Fragment() {
 
-    lateinit var selectMessBinding: FragmentSelectMessBinding
-//    private val db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    private val reference_conttractor = db.reference.child("contractors")
-//    private val reference_student = db.reference.child("students")
-    var messName : String = " "
-    var contractorUid : String = ""
+    private lateinit var selectMessBinding: FragmentSelectMessBinding
+    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private var messName : String = " "
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,7 +39,7 @@ class SelectMessFragment : Fragment() {
     ): View? {
         selectMessBinding = FragmentSelectMessBinding.inflate(inflater,container,false)
 
-//        receiveMessDetails()
+        receiveMessDetails()
 
         selectMessBinding.progressBar.visibility = View.INVISIBLE
 
@@ -42,7 +54,6 @@ class SelectMessFragment : Fragment() {
             val manageMessMenuFragment = ManageMessMenuFragment()
 
             val bundle = Bundle()
-            bundle.putString("userType", "Student")
             bundle.putString("messName", messName)
 
             manageMessMenuFragment.arguments = bundle
@@ -59,6 +70,37 @@ class SelectMessFragment : Fragment() {
                     Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
             }
             else {
+                val messEnrolled = sharedViewModel.student.messEnrolled
+                if (messEnrolled == "") {
+                    val dialog = AlertDialog.Builder(activity)
+                    dialog.setTitle("Are you sure?")
+                    dialog.setCancelable(false)
+                    dialog.setMessage("Once you enroll, you can't change it unless mess bill is generated")
+                    dialog.setNegativeButton(
+                        "No",
+                        DialogInterface.OnClickListener { dialog, which ->
+                            dialog.cancel()
+                        })
+                    dialog.setPositiveButton(
+                        "Yes",
+                        DialogInterface.OnClickListener { dialog, which ->
+                            selectMessBinding.buttonSelectMess.isClickable = false
+                            selectMessBinding.progressBar.visibility = View.VISIBLE
+                            addMessToStudentDb()
+                        })
+                    dialog.create().show()
+                }
+                else {
+                    val dialog = AlertDialog.Builder(activity)
+                    dialog.setTitle("Select Mess")
+                    dialog.setCancelable(false)
+                    dialog.setMessage("You have already enrolled in $messEnrolled for this month")
+                    dialog.setNegativeButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                            dialog.cancel()
+                        })
+                    dialog.create().show()
+                }
+
 //                val studentUid = FirebaseAuth.getInstance().currentUser?.uid.toString()
 //                reference_student.orderByChild("studentId").equalTo(studentUid)
 //                    .addListenerForSingleValueEvent(object :
@@ -112,12 +154,32 @@ class SelectMessFragment : Fragment() {
         return selectMessBinding.root
     }
 
-//    private fun addMessToStudentDb(studentUid: String) {
-//        val map = mutableMapOf<String,Any>()
-//        map["messEnrolled"] = selectMessBinding.textInputMessName.text.toString()
-//
-//        Log.d("student id",studentUid)
-//
+    private fun addMessToStudentDb() {
+        val profileServices: ProfileService = ServiceBuilder.buildService(ProfileService::class.java)
+        val requestCall = profileServices.addMessNameToStudentProfile(messName, sharedViewModel.token)
+
+        requestCall.enqueue(object :Callback<Boolean>{
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if(response.isSuccessful){
+                    Snackbar.make(selectMessBinding.constraintSelectMessLayout,"You have successfully enrolled in $messName", Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
+                    val fragmentManager : FragmentManager = requireActivity().supportFragmentManager
+                    val fragmentTransaction : FragmentTransaction = fragmentManager.beginTransaction()
+                    val studentDashboardFragment = StudentDashboardFragment()
+
+                    fragmentTransaction.replace(R.id.frameLayout,studentDashboardFragment)
+                    fragmentTransaction.addToBackStack(null)
+                    fragmentTransaction.commit()
+//                    updateAvailabilityInCardViewFromDb()
+                }
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                Toast.makeText(context, t.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
+
 //        reference_student.child(studentUid).updateChildren(map).addOnCompleteListener { task ->
 //            if(task.isSuccessful){
 //
@@ -157,12 +219,14 @@ class SelectMessFragment : Fragment() {
 //
 //            }
 //        }
-//
-//        selectMessBinding.buttonSelectMess.isClickable = true
-//        selectMessBinding.progressBar.visibility = View.INVISIBLE
-//    }
+
+        selectMessBinding.buttonSelectMess.isClickable = true
+        selectMessBinding.progressBar.visibility = View.INVISIBLE
+    }
 
 //    private fun updateAvailabilityInCardViewFromDb() {
+//
+//
 //        reference_conttractor.orderByChild("contractorId").equalTo(contractorUid).addValueEventListener(object : ValueEventListener{
 //            override fun onDataChange(snapshot: DataSnapshot) {
 //                for(ds in snapshot.children){
@@ -183,7 +247,6 @@ class SelectMessFragment : Fragment() {
         selectMessBinding.textInputFoodType.setText(arguments?.getString("foodType").toString())
         selectMessBinding.textInputCostPerDay.setText(arguments?.getString("costPerDay").toString())
         selectMessBinding.textInputAvailability.setText(arguments?.getString("availability").toString())
-        contractorUid = arguments?.getString("contractorId").toString()
     }
 
 }
