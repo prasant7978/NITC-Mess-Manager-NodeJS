@@ -100,54 +100,6 @@ class SelectMessFragment : Fragment() {
                         })
                     dialog.create().show()
                 }
-
-//                val studentUid = FirebaseAuth.getInstance().currentUser?.uid.toString()
-//                reference_student.orderByChild("studentId").equalTo(studentUid)
-//                    .addListenerForSingleValueEvent(object :
-//                        ValueEventListener {
-//                        override fun onDataChange(snapshot: DataSnapshot) {
-//                            for (ds in snapshot.children) {
-//                                Log.d("debug", ds.child("messEnrolled").value.toString())
-//                                var messEnrolled = ds.child("messEnrolled").value.toString()
-//
-//                                if (messEnrolled == "") {
-//                                    val dialog = AlertDialog.Builder(activity)
-//                                    dialog.setTitle("Are you sure?")
-//                                    dialog.setCancelable(false)
-//                                    dialog.setMessage("Once you enroll, you can't change it unless mess bill is generated")
-//                                    dialog.setNegativeButton(
-//                                        "No",
-//                                        DialogInterface.OnClickListener { dialog, which ->
-//                                            dialog.cancel()
-//                                        })
-//                                    dialog.setPositiveButton(
-//                                        "Yes",
-//                                        DialogInterface.OnClickListener { dialog, which ->
-//                                            selectMessBinding.buttonSelectMess.isClickable = false
-//                                            selectMessBinding.progressBar.visibility = View.VISIBLE
-//                                            addMessToStudentDb(studentUid.toString())
-//                                        })
-//                                    dialog.create().show()
-//                                } else {
-//                                    val dialog = AlertDialog.Builder(activity)
-//                                    dialog.setTitle("Select Mess")
-//                                    dialog.setCancelable(false)
-//                                    dialog.setMessage("You have already enrolled in $messEnrolled for this month")
-//                                    dialog.setNegativeButton(
-//                                        "OK",
-//                                        DialogInterface.OnClickListener { dialog, which ->
-//                                            dialog.cancel()
-//                                        })
-//                                    dialog.create().show()
-//                                }
-//                            }
-//                        }
-//
-//                        override fun onCancelled(error: DatabaseError) {
-//                            TODO("Not yet implemented")
-//                        }
-//
-//                    })
             }
         }
 
@@ -169,7 +121,6 @@ class SelectMessFragment : Fragment() {
                     fragmentTransaction.replace(R.id.frameLayout,studentDashboardFragment)
                     fragmentTransaction.addToBackStack(null)
                     fragmentTransaction.commit()
-//                    updateAvailabilityInCardViewFromDb()
                 }
             }
 
@@ -179,67 +130,10 @@ class SelectMessFragment : Fragment() {
 
         })
 
-
-//        reference_student.child(studentUid).updateChildren(map).addOnCompleteListener { task ->
-//            if(task.isSuccessful){
-//
-//                var student : Student = Student()
-//                reference_student.child(studentUid).addListenerForSingleValueEvent(object : ValueEventListener{
-//                    override fun onDataChange(snapshot: DataSnapshot) {
-//                        student = snapshot.getValue(Student::class.java)!!
-//                        Log.d("student",student.studentName+" "+student.messEnrolled)
-//
-//                        reference_conttractor.orderByChild("contractorId").equalTo(contractorUid)
-//                            .addListenerForSingleValueEvent(object : ValueEventListener {
-//                                override fun onDataChange(snapshot: DataSnapshot) {
-//                                    for(ds in snapshot.children){
-//                                        val cont : Contractor = ds.getValue(Contractor::class.java)!!
-//                                        cont.availability = cont.availability.toString().toInt() - 1
-//                                        cont.studentEnrolled.add(student)
-//                                        reference_conttractor.child(cont.contractorId).setValue(cont)
-//                                        Snackbar.make(selectMessBinding.constraintSelectMessLayout,"You have successfully enrolled in ${student.messEnrolled}",
-//                                            Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
-//
-//                                        updateAvailabilityInCardViewFromDb()
-//                                    }
-//                                }
-//
-//                                override fun onCancelled(error: DatabaseError) {
-//                                    TODO("Not yet implemented")
-//                                }
-//
-//                            })
-//                    }
-//
-//                    override fun onCancelled(error: DatabaseError) {
-//                        TODO("Not yet implemented")
-//                    }
-//
-//                })
-//
-//            }
-//        }
-
         selectMessBinding.buttonSelectMess.isClickable = true
         selectMessBinding.progressBar.visibility = View.INVISIBLE
     }
 
-//    private fun updateAvailabilityInCardViewFromDb() {
-//
-//
-//        reference_conttractor.orderByChild("contractorId").equalTo(contractorUid).addValueEventListener(object : ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for(ds in snapshot.children){
-//                    selectMessBinding.textInputAvailability.setText(ds.child("availability").value.toString())
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
 
     private fun receiveMessDetails() {
         messName = arguments?.getString("messName").toString()

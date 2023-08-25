@@ -7,6 +7,7 @@ const getAdmin = require('../controllers/admin/getAdmin')
 const updateContractor = require('../controllers/contractor/updateContractor')
 const getAllContractor = require('../controllers/contractor/getAllContractorProfile')
 const addMessNameToStudent = require('../controllers/student/addMessName')
+const addFeedback = require('../controllers/contractor/addFeedback')
 
 router.get('/student', verifyToken, getStudent)
 router.get('/contractor', verifyToken, getContractor)
@@ -14,5 +15,6 @@ router.get('/admin', verifyToken, getAdmin)
 router.put('/updateContractor', verifyToken, updateContractor)
 router.get('/allContractor', verifyToken, getAllContractor)
 router.post('/addMessNameToStudentProfile', verifyToken, addMessNameToStudent)
+router.put('/addFeedbackToContractor', verifyToken, addFeedback)
 
 module.exports = router
