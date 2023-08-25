@@ -22,9 +22,6 @@ interface ProfileService {
     @PUT("getProfile/updateContractor")
     fun updateContractorProfile(@Body map: HashMap<String, Any>, @Header("user-auth-token") token:String): Call<Boolean>
 
-    @PUT("getProfile/addFeedbackToContractor")
-    fun addFeedbackToContractor(@Body map: HashMap<String, String>, @Header("user-auth-token") token: String, @Query("messName") messName: String): Call<Boolean>
-
     @GET("getProfile/student")
     fun getStudentProfileWithToken(@Header("user-auth-token") token:String): Call<Student>
 

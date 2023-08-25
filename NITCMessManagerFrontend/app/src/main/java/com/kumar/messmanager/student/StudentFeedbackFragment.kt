@@ -13,6 +13,7 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
 import com.kumar.messmanager.R
 import com.kumar.messmanager.databinding.FragmentStudentFeedbackBinding
+import com.kumar.messmanager.services.FeedbackServices
 import com.kumar.messmanager.services.ProfileService
 import com.kumar.messmanager.services.ServiceBuilder
 import com.kumar.messmanager.viewmodels.SharedViewModel
@@ -53,8 +54,8 @@ class StudentFeedbackFragment : Fragment() {
         map["studentName"] = studentName
         map["feedbackMessage"] = msg
 
-        val profileService: ProfileService = ServiceBuilder.buildService(ProfileService::class.java)
-        val requestCall = profileService.addFeedbackToContractor(map, token, messName)
+        val feedbackService: FeedbackServices = ServiceBuilder.buildService(FeedbackServices::class.java)
+        val requestCall = feedbackService.addFeedback(map, token, messName)
 
         requestCall.enqueue(object: Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
@@ -80,30 +81,6 @@ class StudentFeedbackFragment : Fragment() {
             }
 
         })
-
-//        reference.orderByChild("messName").equalTo(messName)
-//            .addListenerForSingleValueEvent(object : ValueEventListener {
-//                override fun onDataChange(snapshot: DataSnapshot) {
-//                    for(ds in snapshot.children){
-////                        Log.d("debug",ds.child("contractorName").value.toString())
-//                        val cont : Contractor = ds.getValue(Contractor::class.java)!!
-////                        Log.d("debug",cont.contractorName+" "+cont.messName)
-////                        val feedbackSize = cont.feedbackReceived.size
-////                        val lastFeedbackId = cont.feedbackReceived[feedbackSize-1].feedbackId
-//                        val id = reference.push().key.toString()
-//                        val feedback = Feedback(id,msg,studentName)
-//                        cont.feedbackReceived.add(feedback)
-//                        reference.child(cont.contractorId).setValue(cont)
-//                        Snackbar.make(studentFeedbackBinding.constraintLayoutFeedback,"Thank you for taking the time to provide your feedback.",
-//                            Snackbar.LENGTH_INDEFINITE).setAction("Close", View.OnClickListener { }).show()
-//                    }
-//                }
-//
-//                override fun onCancelled(error: DatabaseError) {
-//                    TODO("Not yet implemented")
-//                }
-//
-//            })
 
         studentFeedbackBinding.feedbackMessage.setText("")
         studentFeedbackBinding.buttonSend.isClickable = true

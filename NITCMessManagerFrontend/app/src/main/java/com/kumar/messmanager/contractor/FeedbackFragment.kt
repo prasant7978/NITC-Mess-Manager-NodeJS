@@ -12,10 +12,8 @@ import com.kumar.messmanager.model.Feedback
 
 class FeedbackFragment : Fragment() {
 
-    lateinit var feedbackFragmentBinding : FragmentFeedbackBinding
+    private lateinit var feedbackFragmentBinding : FragmentFeedbackBinding
     var feedbackList = ArrayList<Feedback>()
-//    val db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    val ref = db.reference.child("contractors")
     lateinit var feedbackAdapter: FeedbackAdapter
 
     override fun onCreateView(
@@ -26,13 +24,16 @@ class FeedbackFragment : Fragment() {
 
         feedbackFragmentBinding.textViewNoFeedbackToShow.visibility = View.INVISIBLE
 
-//        retrieveFeedbackListFromDb()
+        retrieveFeedbackListFromDb()
 
         return feedbackFragmentBinding.root
     }
 
-//    private fun retrieveFeedbackListFromDb() {
-//        feedbackFragmentBinding.progressBar.visibility = View.VISIBLE
+    private fun retrieveFeedbackListFromDb() {
+        feedbackFragmentBinding.progressBar.visibility = View.VISIBLE
+
+
+
 //        val uid = FirebaseAuth.getInstance().currentUser?.uid
 //        ref.orderByChild("contractorId").equalTo(uid).addListenerForSingleValueEvent(object : ValueEventListener{
 //            override fun onDataChange(snapshot: DataSnapshot) {
@@ -64,6 +65,6 @@ class FeedbackFragment : Fragment() {
 //            }
 //
 //        })
-//    }
+    }
 
 }
