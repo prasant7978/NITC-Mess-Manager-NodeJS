@@ -9,8 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kumar.messmanager.R
 import com.kumar.messmanager.databinding.ItemFeedbackBinding
 import com.kumar.messmanager.model.Feedback
+import com.kumar.messmanager.viewmodels.SharedViewModel
 
-class FeedbackAdapter(private var feedbackList : ArrayList<Feedback>) : RecyclerView.Adapter<FeedbackAdapter.FeedbackViewHolder>(){
+class FeedbackAdapter(private var feedbackList : ArrayList<Feedback>, var sharedViewModel: SharedViewModel) : RecyclerView.Adapter<FeedbackAdapter.FeedbackViewHolder>(){
     class FeedbackViewHolder(val adapterBinding : ItemFeedbackBinding) : RecyclerView.ViewHolder(adapterBinding.root){
         val name : TextView = adapterBinding.textViewFeedbackStudentName
         val msg : TextView = adapterBinding.textViewFeedbackMessage
@@ -29,13 +30,9 @@ class FeedbackAdapter(private var feedbackList : ArrayList<Feedback>) : Recycler
         holder.adapterBinding.textViewFeedbackStudentName.text = feedbackList[position].studentName
         holder.adapterBinding.textViewFeedbackMessage.text = feedbackList[position].feedbackMessage
         holder.adapterBinding.constraintLayout.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putString("studentName",feedbackList[position].studentName)
-            bundle.putString("feedbackMessage",feedbackList[position].feedbackMessage)
-            bundle.putString("feedbackId",feedbackList[position].feedbackId)
+            sharedViewModel.feedback = feedbackList[position]
 
             val singleFeedbackFragment = SingleFeedbackFragment()
-            singleFeedbackFragment.arguments = bundle
 
             val appCompatActivity = it.context as AppCompatActivity
             appCompatActivity.supportFragmentManager.beginTransaction()

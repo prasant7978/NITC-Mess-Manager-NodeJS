@@ -3,6 +3,7 @@ package com.kumar.messmanager.viewmodels
 import androidx.lifecycle.ViewModel
 import com.kumar.messmanager.model.Admin
 import com.kumar.messmanager.model.Contractor
+import com.kumar.messmanager.model.Feedback
 import com.kumar.messmanager.model.Student
 
 class SharedViewModel: ViewModel() {
@@ -11,4 +12,5 @@ class SharedViewModel: ViewModel() {
     lateinit var admin: Admin
     lateinit var userType: String
     lateinit var token: String
+    lateinit var feedback: Feedback
 }
