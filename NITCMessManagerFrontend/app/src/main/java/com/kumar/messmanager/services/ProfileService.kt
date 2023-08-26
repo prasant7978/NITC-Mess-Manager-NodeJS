@@ -25,6 +25,9 @@ interface ProfileService {
     @GET("getProfile/student")
     fun getStudentProfileWithToken(@Header("user-auth-token") token:String): Call<Student>
 
+    @GET("getProfile/allEnrolledStudent")
+    fun getAllEnrolledStudent(@Header("user-auth-token") token:String, @Query("messName") messName: String): Call<ArrayList<Student>>
+
     @PUT("getProfile/updateStudent")
     fun updateStudentProfile(@Body map: HashMap<String, Any>, @Header("user-auth-token") token:String): Call<Boolean>
 

@@ -83,36 +83,6 @@ class SingleFeedbackFragment : Fragment() {
             }
 
         })
-
-
-//        val contractorId = FirebaseAuth.getInstance().currentUser?.uid.toString()
-//        reference.child(contractorId).addListenerForSingleValueEvent(object:ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                var contractor = snapshot.getValue(Contractor::class.java)
-//                if (contractor?.feedbackReceived != null) {
-//                    for(fd in contractor.feedbackReceived){
-//                        if(fd.feedbackId == uid){
-//                            contractor.feedbackReceived.remove(fd)
-//                            break
-//                        }
-//                    }
-//                    reference.child(contractorId).setValue(contractor).addOnCompleteListener { task ->
-//                        if(task.isSuccessful){
-//                            Snackbar.make(singleFeedbackBinding.constraintLayout,"The feedback has been deleted",
-//                                Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
-//                            requireActivity().supportFragmentManager.popBackStack()
-//                        }
-//                        else{
-//                            Snackbar.make(singleFeedbackBinding.constraintLayout,"The deletion was not successful, Please try again!",Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
-//                        }
-//                    }
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//        })
     }
 
     private fun receiveDetailsFromRecyclerView() {
