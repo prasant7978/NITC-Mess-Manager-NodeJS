@@ -1,6 +1,7 @@
 package com.kumar.messmanager.contractor
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +37,8 @@ class ContractorDashboardFragment : Fragment() {
         getContractorCoroutineScope.launch {
             val contractor = getProfileAccess.retrieveContractorInfo(sharedViewModel)
             if(contractor != null) {
-                noOfEnrolledStudent = contractor.studentEnrolled.size
+                noOfEnrolledStudent = contractor.totalEnrolled
+                Log.d("enroll", noOfEnrolledStudent.toString())
                 contractorDashboardBinding.textViewContractorName.text = contractor.contractorName
             }
 
@@ -65,7 +67,7 @@ class ContractorDashboardFragment : Fragment() {
         }
 
         contractorDashboardBinding.generateBill.setOnClickListener {
-            if(noOfEnrolledStudent != 0) {
+            if(noOfEnrolledStudent > 0) {
                 val fragmentManager: FragmentManager = requireActivity().supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
                 val generateBillFragment = GenerateBillFragment()

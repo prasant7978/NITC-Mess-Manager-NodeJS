@@ -14,6 +14,7 @@ module.exports = async(req, res) => {
             costPerDay: result.costPerDay,
             totalDue: result.totalDue,
             userType: result.userType,
+            totalEnrolled: result.studentEnrolled.length
         }
         res.status(200).send(contractor)
     }

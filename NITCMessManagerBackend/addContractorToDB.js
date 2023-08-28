@@ -12,6 +12,7 @@ const contractor = new Contractor({
     messName: "XYZ",
     foodType: "North Indian Veg & Non-Veg",
     capacity: 500,
+    availability: 500,
     costPerDay: 130,
     userType: "Contractor"
 })

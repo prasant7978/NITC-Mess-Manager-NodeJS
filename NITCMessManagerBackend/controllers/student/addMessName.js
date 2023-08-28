@@ -2,8 +2,6 @@ const Student = require('../../models/student')
 const Contractor = require('../../models/contractor')
 
 module.exports = async(req, res) => {
-    // try{
-
     var studentUpdated = Student.updateOne({_id: req.id},{
         $set: {
             "messEnrolled": req.query.messName
@@ -18,7 +16,8 @@ module.exports = async(req, res) => {
                     "studentEnrolled": req.id
                 },
                 $inc: {
-                    "availability": -1
+                    "availability": -1,
+                    "totalEnrolled": 1
                 }
             }
         )
@@ -37,10 +36,4 @@ module.exports = async(req, res) => {
         console.log("Error: " + err);
         res.status(400).send(false)
     })
-
-    // }
-    // catch(err){
-    //     console.log("Error: " + err.message)
-    //     res.status(400).send(false);
-    // }
 }

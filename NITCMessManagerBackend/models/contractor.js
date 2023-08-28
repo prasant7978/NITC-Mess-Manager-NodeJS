@@ -15,6 +15,7 @@ const contractorSchema = new mongoose.Schema({
     costPerDay: {type: 'number'},
     totalDue: {type: 'number', default: 0},
     userType: {type: 'string', required: true},
+    totalEnrolled: {type: 'number', default: 0},
     studentEnrolled: [String],
     messMenu: [menu.schema],
     feedbackReceived: [feedback.schema]

@@ -2,6 +2,7 @@ package com.kumar.messmanager.contractor
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,14 +10,24 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.activityViewModels
+import com.google.android.material.snackbar.Snackbar
+import com.kumar.messmanager.R
 import com.kumar.messmanager.databinding.FragmentCalculateBillPerStudentBinding
+import com.kumar.messmanager.model.Student
+import com.kumar.messmanager.services.BillServices
+import com.kumar.messmanager.services.ProfileService
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.viewmodels.SharedViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class CalculateBillPerStudentFragment(var thisFragmentManager:FragmentManager) : Fragment() {
 
     lateinit var calculateBillPerStudentBinding: FragmentCalculateBillPerStudentBinding
-//    val db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    val reference = db.reference.child("contractors")
-//    val reference_student = db.reference.child("students")
+    val sharedViewModel: SharedViewModel by activityViewModels()
     private var totalEnrolledStudent = 0
     private var messName = ""
 
@@ -26,7 +37,7 @@ class CalculateBillPerStudentFragment(var thisFragmentManager:FragmentManager) :
     ): View? {
         calculateBillPerStudentBinding = FragmentCalculateBillPerStudentBinding.inflate(inflater,container,false)
 
-//        retrieveCostPerDayFromDb()
+        retrieveCostPerDayFromDb()
 
         calculateBillPerStudentBinding.buttonGenerateBill.setOnClickListener {
             val days = calculateBillPerStudentBinding.textInputLayoutNoOfDaysInt.text.toString()
@@ -39,9 +50,9 @@ class CalculateBillPerStudentFragment(var thisFragmentManager:FragmentManager) :
             }
             else if(calculateBillPerStudentBinding.textInputLayoutNoOfDaysInt.text.isEmpty()){
                 Toast.makeText(activity,"Please, enter number of days to calculate",Toast.LENGTH_SHORT).show()
-            }else{
+            }
+            else{
                 showAlertMessage()
-
             }
         }
 
@@ -57,101 +68,46 @@ class CalculateBillPerStudentFragment(var thisFragmentManager:FragmentManager) :
             dialog.cancel()
         })
         dialog?.setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which ->
-//            generateBill()
+            generateBill()
         })
         dialog?.create()?.show()
     }
 
-//    private fun generateBill() {
-//        val uid = FirebaseAuth.getInstance().currentUser?.uid.toString()
-//        val cost = calculateBillPerStudentBinding.displayCostPerDayInt.text.toString().toInt()
-//        val days = calculateBillPerStudentBinding.textInputLayoutNoOfDaysInt.text.toString().toInt()
-//
-//        val totalCostPerStudent = cost * days
-//
-//        val totalDue = totalEnrolledStudent * totalCostPerStudent
-//
-//        var updatedStudentList = ArrayList<Student>()
-//
-//        reference_student.orderByChild("messEnrolled").equalTo(messName).addListenerForSingleValueEvent(object : ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                updatedStudentList.clear()
-//                for(std in snapshot.children){
-//                    val student = std.getValue(Student::class.java)
-//                    if(student != null){
-//                        student.messBill = totalCostPerStudent
-//                        student.paymentStatus = "not-paid"
-//                        reference_student.child(student.studentId).setValue(student)
-//                        updatedStudentList.add(student)
-//                    }
-//                }
-//
-//                reference.orderByChild("contractorId").equalTo(uid)
-//                    .addListenerForSingleValueEvent(object : ValueEventListener {
-//                        override fun onDataChange(snapshot: DataSnapshot) {
-//                            for(ds in snapshot.children){
-//                                val cont : Contractor = ds.getValue(Contractor::class.java)!!
-//                                cont.studentEnrolled.clear()
-//                                cont.studentEnrolled = updatedStudentList
-//                                cont.totalDue = totalDue
-//                                reference.child(cont.contractorId).setValue(cont)
-//                            }
-//                        }
-//
-//                        override fun onCancelled(error: DatabaseError) {
-//                            TODO("Not yet implemented")
-//                        }
-//
-//                    })
-//
-////                Toast.makeText(getContext(),"Bill generated successfully",Toast.LENGTH_LONG).show()
-//                Snackbar.make(calculateBillPerStudentBinding.constraintLayoutCalculateBillPerStudent,"Bill Generated successfully", Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
-////                reference.child(uid).updateChildren(map).addOnCompleteListener { task ->
-////                    if(task.isSuccessful){
-//                val bundle = Bundle()
-//                bundle.putInt("totalCostPerStudent",totalCostPerStudent)
-//                bundle.putInt("totalEnrolledStudent",totalEnrolledStudent)
-//                bundle.putInt("totalDue",totalDue)
-//
-//                val fragmentManager : FragmentManager = thisFragmentManager
-//                val fragmentTransaction : FragmentTransaction = fragmentManager.beginTransaction()
-//                val totalBillGeneratedFragment = TotalBillGeneratedFragment()
-//
-//                totalBillGeneratedFragment.arguments = bundle
-//
-//                fragmentTransaction.replace(R.id.frameLayoutBill,totalBillGeneratedFragment)
-//                fragmentTransaction.commit()
-////                    }
-////                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
+    private fun generateBill() {
+        val days = calculateBillPerStudentBinding.textInputLayoutNoOfDaysInt.text.toString().toInt()
 
-//    private fun retrieveCostPerDayFromDb() {
-//        val uid = FirebaseAuth.getInstance().currentUser?.uid
-//        reference.orderByChild("contractorId").equalTo(uid).addListenerForSingleValueEvent(object :
-//            ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for(ds in snapshot.children){
-//                    val contractor = ds.getValue(Contractor::class.java)
-//                    if(contractor != null) {
-//                        calculateBillPerStudentBinding.displayCostPerDayInt.text = contractor.costPerDay.toString()
-//                        totalEnrolledStudent = contractor.studentEnrolled.size
-//                        messName = contractor.messName
-//                    }
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
+        val billServices: BillServices = ServiceBuilder.buildService(BillServices::class.java)
+        val requestCall = billServices.generateBill(sharedViewModel.token, days)
+
+        requestCall.enqueue(object: Callback<Boolean>{
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if(response.isSuccessful){
+                    Snackbar.make(calculateBillPerStudentBinding.constraintLayoutCalculateBillPerStudent,"Bill Generated successfully",
+                        Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
+
+                    val fragmentManager : FragmentManager = thisFragmentManager
+                    val fragmentTransaction : FragmentTransaction = fragmentManager.beginTransaction()
+                    val totalBillGeneratedFragment = TotalBillGeneratedFragment()
+
+                    fragmentTransaction.replace(R.id.frameLayoutBill,totalBillGeneratedFragment)
+                    fragmentTransaction.commit()
+                }
+                else
+                    Toast.makeText(context, "Server Error", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                Log.d("failure", t.localizedMessage)
+                Toast.makeText(context, t.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
+    private fun retrieveCostPerDayFromDb() {
+        calculateBillPerStudentBinding.displayCostPerDayInt.text = sharedViewModel.contractor.costPerDay.toString()
+        totalEnrolledStudent = sharedViewModel.contractor.totalEnrolled
+        messName = sharedViewModel.contractor.messName
+    }
 
 }

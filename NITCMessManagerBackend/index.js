@@ -25,6 +25,9 @@ app.use('/messMenu', messMenuRouter)
 const feedbackRouter = require("./routes/feedback.js")
 app.use('/feedback', feedbackRouter)
 
+const messBillRouter = require("./routes/messBill.js")
+app.use('/messBill', messBillRouter)
+
 app.listen(3000, '192.168.238.154', () => {
     console.log("listening on port 3000 ...")
 })
