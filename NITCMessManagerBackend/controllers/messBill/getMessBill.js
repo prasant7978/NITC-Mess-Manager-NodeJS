@@ -19,7 +19,7 @@ module.exports = async(req, res) => {
 
                     console.log("Students not paid bill: " + countBillNotPaidStudent);
 
-                    let costPerStudent = countBillNotPaidStudent * contractor.costPerDay
+                    let costPerStudent = contractor.totalDue / countBillNotPaidStudent
 
                     res.status(200).send(JSON.stringify({
                         "totalDue": contractor.totalDue,

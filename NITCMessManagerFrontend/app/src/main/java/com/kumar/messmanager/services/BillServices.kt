@@ -12,4 +12,7 @@ interface BillServices {
 
     @GET("messBill/getMessBill")
     fun getBillDetails(@Header("user-auth-token") token: String): Call<HashMap<String, String>>
+
+    @PUT("messBill/payBill")
+    fun payBill(@Header("user-auth-token") token: String, @Query("messBill") messBill: Int, @Query("messName") messName: String): Call<Boolean>
 }

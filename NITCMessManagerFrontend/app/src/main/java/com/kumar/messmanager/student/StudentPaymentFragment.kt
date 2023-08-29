@@ -8,18 +8,26 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.snackbar.Snackbar
+import com.kumar.messmanager.R
 import com.kumar.messmanager.databinding.FragmentStudentPaymentBinding
 import com.kumar.messmanager.model.Contractor
 import com.kumar.messmanager.model.Student
+import com.kumar.messmanager.services.BillServices
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.viewmodels.SharedViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class StudentPaymentFragment : Fragment() {
 
-    lateinit var studentPaymentBinding: FragmentStudentPaymentBinding
-//    var db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    var ref = db.reference.child("students")
-//    var ref_contractor = db.reference.child("contractors")
-    var due : Int = 0
+    private lateinit var studentPaymentBinding: FragmentStudentPaymentBinding
+    val sharedViewModel: SharedViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,50 +35,73 @@ class StudentPaymentFragment : Fragment() {
     ): View? {
         studentPaymentBinding = FragmentStudentPaymentBinding.inflate(inflater,container,false)
 
-//        val uid = FirebaseAuth.getInstance().currentUser?.uid.toString()
-
-//        retrieveDueAmount(uid)
+        studentPaymentBinding.textViewDues.text = sharedViewModel.student.messBill.toString()
 
         studentPaymentBinding.buttonPayBill.setOnClickListener {
-//            payBill(uid)
+            payBill()
         }
 
         return studentPaymentBinding.root
     }
 
-//    private fun payBill(uid : String){
-//        studentPaymentBinding.buttonPayBill.isClickable = false
-//        if(due != 0){
-//            val dialog = AlertDialog.Builder(activity)
-//            dialog.setTitle("Pay Mess Bill")
-//            dialog.setCancelable(false)
-//            dialog.setMessage("A amount of " + due + " will be credited from your bank account")
-//            dialog.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
-//                dialog.cancel()
-//            })
-//            dialog.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
-//                updateDb(uid)
-//
-//                Snackbar.make(studentPaymentBinding.constraintPaymentLayout,"Your payment was successful", Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
-//            })
-//            dialog.create().show()
-//        }
-//        else{
-//            val dialog = AlertDialog.Builder(activity)
-//            dialog.setTitle("Pay Mess Bill")
-//            dialog.setCancelable(false)
-//            dialog.setMessage("You don't have any due to pay")
-//            dialog.setNegativeButton("OK", DialogInterface.OnClickListener { dialog, which ->
-//                dialog.cancel()
-//            })
-//            dialog.create().show()
-//        }
-//        studentPaymentBinding.buttonPayBill.isClickable = true
-//    }
+    private fun payBill(){
+        studentPaymentBinding.buttonPayBill.isClickable = false
+        
+        if(sharedViewModel.student.messBill != 0){
+            val dialog = AlertDialog.Builder(activity)
+            dialog.setTitle("Pay Mess Bill")
+            dialog.setCancelable(false)
+            dialog.setMessage("A amount of " + sharedViewModel.student.messBill + " will be credited from your bank account")
+            dialog.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
+                dialog.cancel()
+            })
+            dialog.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                updateDb()
+            })
+            dialog.create().show()
+        }
+        else{
+            val dialog = AlertDialog.Builder(activity)
+            dialog.setTitle("Pay Mess Bill")
+            dialog.setCancelable(false)
+            dialog.setMessage("You don't have any due to pay")
+            dialog.setNegativeButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                dialog.cancel()
+            })
+            dialog.create().show()
+        }
+        studentPaymentBinding.buttonPayBill.isClickable = true
+    }
 
-//    private fun updateDb(uid : String) {
-//        var bill = 0
-//        var messName = ""
+    private fun updateDb() {
+        val billServices: BillServices = ServiceBuilder.buildService(BillServices::class.java)
+        val requestCall = billServices.payBill(sharedViewModel.token, sharedViewModel.student.messBill, sharedViewModel.student.messEnrolled)
+        Log.d("mess", sharedViewModel.student.messEnrolled)
+
+        requestCall.enqueue(object: Callback<Boolean>{
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if(response.isSuccessful){
+                    Snackbar.make(studentPaymentBinding.constraintPaymentLayout,"Your payment was successful", Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
+
+                    val fragmentManager : FragmentManager = requireActivity().supportFragmentManager
+                    val fragmentTransaction : FragmentTransaction = fragmentManager.beginTransaction()
+                    val studentDashboardFragment = StudentDashboardFragment()
+
+                    fragmentTransaction.replace(R.id.frameLayout,studentDashboardFragment)
+                    fragmentTransaction.addToBackStack(null)
+                    fragmentTransaction.commit()
+                }
+                else
+                    Toast.makeText(context, "Server Error", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                Log.d("failure", t.localizedMessage)
+                Toast.makeText(context, t.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
 //        ref.orderByChild("studentId").equalTo(uid).addListenerForSingleValueEvent(object : ValueEventListener{
 //            override fun onDataChange(snapshot: DataSnapshot) {
 //                for(std in snapshot.children){
@@ -128,7 +159,7 @@ class StudentPaymentFragment : Fragment() {
 //                                }
 //
 //                            })
-//                        retrieveDueAmount(uid)
+    //                        retrieveDueAmount(uid)
 //
 //                    }
 //
@@ -144,25 +175,6 @@ class StudentPaymentFragment : Fragment() {
 //            }
 //
 //        })
-//    }
-
-//    fun retrieveDueAmount(uid: String){
-//        ref.orderByChild("studentId").equalTo(uid).addListenerForSingleValueEvent(object :
-//            ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for(ds in snapshot.children) {
-//                    Log.d("debug",ds.child("messBill").value.toString())
-//                    due = ds.child("messBill").value.toString().toInt()
-//                    Log.d("payment",due.toString())
-//                    studentPaymentBinding.textViewDues.text = ds.child("messBill").value.toString()
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
+    }
 
 }
