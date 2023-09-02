@@ -1,14 +1,18 @@
 package com.kumar.messmanager.admin
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kumar.messmanager.R
 import com.kumar.messmanager.databinding.ItemStudentBinding
 import com.kumar.messmanager.model.Student
+import com.kumar.messmanager.viewmodels.SharedViewModel
 
 class StudentAdapter(private var studentList : ArrayList<Student>) : RecyclerView.Adapter<StudentAdapter.StudentViewHolder>(){
 
@@ -34,14 +38,7 @@ class StudentAdapter(private var studentList : ArrayList<Student>) : RecyclerVie
 
         holder.adapterBinding.constraintLayout.setOnClickListener {
             val bundle = Bundle()
-            bundle.putString("studentName",studentList[position].studentName)
-            bundle.putString("studentRoll",studentList[position].studentRollNo)
-            bundle.putString("studentEmail",studentList[position].studentEmail)
-            bundle.putString("studentMess",studentList[position].messEnrolled)
-            bundle.putString("studentPass",studentList[position].studentPassword)
-            bundle.putString("studentBill",studentList[position].messBill.toString())
-            bundle.putString("studentPaymentStatus",studentList[position].paymentStatus)
-            bundle.putString("studentId",studentList[position].studentId)
+            bundle.putString("studentId", studentList[position]._id)
 
             val updateStudentFragment = UpdateStudentFragment()
             updateStudentFragment.arguments = bundle
@@ -54,8 +51,8 @@ class StudentAdapter(private var studentList : ArrayList<Student>) : RecyclerVie
         }
     }
 
-    fun getStudentId(position: Int) : String{
-        return studentList[position].studentId
+    fun getStudentId(position: Int) : String {
+        return studentList[position]._id
     }
 
     fun searchByRoll(searchList : ArrayList<Student>){

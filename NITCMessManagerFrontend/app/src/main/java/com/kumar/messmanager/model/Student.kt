@@ -1,6 +1,6 @@
 package com.kumar.messmanager.model
 
-data class Student(var studentId : String = "",
+data class Student(var _id : String = "",
                    var studentName : String = "",
                    var studentEmail : String = "",
                    var studentPassword : String = "",
