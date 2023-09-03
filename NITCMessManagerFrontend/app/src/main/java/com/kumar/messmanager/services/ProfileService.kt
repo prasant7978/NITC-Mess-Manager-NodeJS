@@ -14,8 +14,12 @@ import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface ProfileService {
+//    Contractor
     @GET("getProfile/contractor")
     fun getContractorProfileWithToken(@Header("user-auth-token") token:String): Call<Contractor>
+
+    @GET("getProfile/contractorWithId")
+    fun getContractorProfileWithId(@Header("user-auth-token") token:String, @Query("contractorId") contractorId: String): Call<Contractor>
 
     @GET("getProfile/allContractor")
     fun getAllContractorProfile(@Header("user-auth-token") token: String): Call<ArrayList<Contractor>>
@@ -23,6 +27,16 @@ interface ProfileService {
     @PUT("getProfile/updateContractor")
     fun updateContractorProfile(@Body map: HashMap<String, Any>, @Header("user-auth-token") token:String): Call<Boolean>
 
+    @PUT("getProfile/adminUpdateContractor")
+    fun adminUpdateContractorProfile(@Body map: HashMap<String, Any>, @Header("user-auth-token") token:String): Call<Boolean>
+
+    @POST("getProfile/addContractor")
+    fun addContractor(@Header("user-auth-token") token: String, @Body map: HashMap<String, Any>): Call<Boolean>
+
+    @DELETE("getProfile/deleteContractor")
+    fun deleteContractor(@Header("user-auth-token") token: String, @Query("contractorId") contractorId: String): Call<Boolean>
+
+//    Student
     @GET("getProfile/student")
     fun getStudentProfileWithToken(@Header("user-auth-token") token:String): Call<Student>
 
@@ -47,6 +61,7 @@ interface ProfileService {
     @POST("getProfile/addMessNameToStudentProfile")
     fun addMessNameToStudentProfile(@Query("messName") messName: String, @Header("user-auth-token") token: String): Call<Boolean>
 
+//    Admin
     @GET("getProfile/admin")
     fun getAdminProfileWithToken(@Header("user-auth-token") token:String): Call<Admin>
 }

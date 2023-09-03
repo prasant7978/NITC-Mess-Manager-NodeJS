@@ -154,7 +154,8 @@ class UpdateStudentFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                TODO("Not yet implemented")
+                Log.d("deleteStudent", t.localizedMessage)
+                Toast.makeText(context, t.localizedMessage, Toast.LENGTH_SHORT).show()
             }
 
         })

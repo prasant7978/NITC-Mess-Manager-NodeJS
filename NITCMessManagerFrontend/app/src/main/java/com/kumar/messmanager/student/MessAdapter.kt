@@ -34,7 +34,7 @@ class MessAdapter(private var messList : ArrayList<Contractor>) : RecyclerView.A
             bundle.putString("foodType",messList[position].foodType)
             bundle.putString("costPerDay",messList[position].costPerDay.toString())
             bundle.putString("availability",messList[position].availability.toString())
-            bundle.putString("contractorId",messList[position].contractorId)
+            bundle.putString("contractorId",messList[position]._id)
 
             val selectMessFragment = SelectMessFragment()
             selectMessFragment.arguments = bundle

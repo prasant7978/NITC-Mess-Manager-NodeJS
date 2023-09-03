@@ -91,7 +91,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Click on forgot password to change password"
+            android:hint="Contact Admin to change password"
             android:textColorHint="@color/button_delete"
             app:boxBackgroundColor="@color/white"
             app:boxStrokeColor="@color/contractor_profile_cardview_bg"

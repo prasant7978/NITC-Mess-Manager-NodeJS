@@ -4,7 +4,7 @@ import com.kumar.messmanager.model.Feedback
 import com.kumar.messmanager.model.Menu
 import com.kumar.messmanager.model.Student
 
-data class Contractor(var contractorId : String = "",
+data class Contractor(var _id : String = "",
                       var contractorEmail : String = "",
                       var contractorPassword : String = "",
                       var userType : String = "",

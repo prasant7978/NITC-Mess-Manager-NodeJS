@@ -2,12 +2,15 @@ package com.kumar.messmanager.admin
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.text.isDigitsOnly
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.kumar.messmanager.R
@@ -16,13 +19,18 @@ import com.kumar.messmanager.databinding.FragmentUpdateContractorBinding
 import com.kumar.messmanager.model.Contractor
 import com.kumar.messmanager.model.Feedback
 import com.kumar.messmanager.model.Student
+import com.kumar.messmanager.services.ProfileService
+import com.kumar.messmanager.services.ServiceBuilder
+import com.kumar.messmanager.viewmodels.SharedViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class UpdateContractorFragment : Fragment() {
-    lateinit var updateContractorBinding: FragmentUpdateContractorBinding
-//    private val db : FirebaseDatabase = FirebaseDatabase.getInstance()
-//    private val reference = db.reference.child("contractors")
+    private lateinit var updateContractorBinding: FragmentUpdateContractorBinding
+    val sharedViewModel: SharedViewModel by activityViewModels()
 
-    private var uid = ""
+    private var contractorId = ""
     lateinit var contractor : Contractor
     private var slotFilled = 0
 
@@ -32,10 +40,7 @@ class UpdateContractorFragment : Fragment() {
     ): View? {
         updateContractorBinding = FragmentUpdateContractorBinding.inflate(inflater,container,false)
 
-        updateContractorBinding.textInputContractorEmail.isEnabled = false
-        updateContractorBinding.textInputContractorPass.isEnabled = false
-
-        receiveContractorDetails()
+        retrieveDetailsFromDb()
 
         updateContractorBinding.textInputAvailability.isEnabled = false
 
@@ -57,18 +62,32 @@ class UpdateContractorFragment : Fragment() {
                 Snackbar.make(updateContractorBinding.linearLayout,"Capacity can't be zero or negative",Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
             }
             else {
-                updateContractorDetails()
+                showAlertMessageForUpdate()
             }
         }
 
         updateContractorBinding.buttonDeleteContractor.setOnClickListener {
-            showAlertMessage()
+            showAlertMessageForDelete()
         }
 
         return updateContractorBinding.root
     }
 
-    private fun showAlertMessage() {
+    private fun showAlertMessageForUpdate() {
+        val dialog = activity?.let { AlertDialog.Builder(it) }
+        dialog?.setCancelable(false)
+        dialog?.setTitle("Delete Contractor")
+        dialog?.setMessage("Are you sure you want to update this contractor ?")
+        dialog?.setNegativeButton("No", DialogInterface.OnClickListener{ dialog, which ->
+            dialog.cancel()
+        })
+        dialog?.setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which ->
+            updateContractorDetails()
+        })
+        dialog?.create()?.show()
+    }
+
+    private fun showAlertMessageForDelete() {
         val dialog = activity?.let { AlertDialog.Builder(it) }
         dialog?.setCancelable(false)
         dialog?.setTitle("Delete Contractor")
@@ -76,13 +95,38 @@ class UpdateContractorFragment : Fragment() {
         dialog?.setNegativeButton("No", DialogInterface.OnClickListener{ dialog, which ->
             dialog.cancel()
         })
-//        dialog?.setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which ->
-//            deleteContractor()
-//        })
+        dialog?.setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which ->
+            deleteContractor()
+        })
         dialog?.create()?.show()
     }
 
-//    private fun deleteContractor() {
+    private fun deleteContractor() {
+        val profileService: ProfileService = ServiceBuilder.buildService(ProfileService::class.java)
+        val requestCall = profileService.deleteContractor(sharedViewModel.token, contractorId)
+
+        requestCall.enqueue(object: Callback<Boolean>{
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if(response.isSuccessful){
+                    if(response.body() == true){
+                        clearAllTextArea()
+                        Snackbar.make(updateContractorBinding.linearLayout,"The contractor has been deleted",Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
+                        requireActivity().supportFragmentManager.popBackStack()
+                    }
+                    else
+                        Snackbar.make(updateContractorBinding.linearLayout,"The deletion was not successful, Please try again!",Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
+                }
+                else
+                    Toast.makeText(context, "Server Error", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                Log.d("deleteContractor", t.localizedMessage)
+                Toast.makeText(context, t.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
 //        reference.child(uid).removeValue().addOnCompleteListener { task ->
 //            if(task.isSuccessful){
 //                reference.orderByChild("studentId").equalTo(uid).addListenerForSingleValueEvent(object : ValueEventListener{
@@ -106,7 +150,7 @@ class UpdateContractorFragment : Fragment() {
 //                Snackbar.make(updateContractorBinding.linearLayout,"The deletion was not successful, Please try again!",Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
 //            }
 //        }
-//    }
+    }
 
     private fun clearAllTextArea() {
         updateContractorBinding.textInputContractorName.setText("")
@@ -125,11 +169,10 @@ class UpdateContractorFragment : Fragment() {
         updateContractorBinding.buttonDeleteContractor.isClickable = false
         updateContractorBinding.progressBar.visibility = View.VISIBLE
 
-        val map = mutableMapOf<String,Any>()
-        map["contractorId"] = uid
+        val map = HashMap<String,Any>()
+        map["contractorId"] = contractorId
         map["contractorEmail"] = updateContractorBinding.textInputContractorEmail.text.toString()
         map["contractorPassword"] = updateContractorBinding.textInputContractorPass.text.toString()
-        map["userType"] = "Contractor"
         map["contractorName"] = updateContractorBinding.textInputContractorName.text.toString()
         map["costPerDay"] = updateContractorBinding.textInputCostPerDay.text.toString().toInt()
         map["messName"] = updateContractorBinding.textInputMessName.text.toString()
@@ -137,57 +180,72 @@ class UpdateContractorFragment : Fragment() {
         map["capacity"] = updateContractorBinding.textInputCapacity.text.toString().toInt()
 
         val updatedAvailability = updateContractorBinding.textInputCapacity.text.toString().toInt() - slotFilled
-
         map["availability"] = updatedAvailability
+
+        val profileService: ProfileService = ServiceBuilder.buildService(ProfileService::class.java)
+        val requestCall = profileService.adminUpdateContractorProfile(map, sharedViewModel.token)
+
+        requestCall.enqueue(object: Callback<Boolean>{
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if(response.isSuccessful){
+                    retrieveDetailsFromDb()
+                    Snackbar.make(updateContractorBinding.linearLayout,"The contractor has been updated successfully", Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
+                }
+                else
+                    Toast.makeText(context, "Server Error", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                Log.d("updateStudent", t.localizedMessage)
+                Toast.makeText(context, t.localizedMessage, Toast.LENGTH_SHORT).show()
+            }
+
+        })
+
 //        map["feedbackReceived"] = adminViewModel.feedbackList
 //        map["studentEnrolled"] = adminViewModel.studentEnrolledList
 
-//        reference.child(uid).updateChildren(map).addOnCompleteListener { task ->
-//            if(task.isSuccessful){
-//                retrieveDetailsFromDb()
-//                Snackbar.make(updateContractorBinding.linearLayout,"The contractor has been updated successfully", Snackbar.LENGTH_LONG).setAction("Close", View.OnClickListener { }).show()
-//            }
-//            updateContractorBinding.buttonUpdateContractor.isClickable = true
-//            updateContractorBinding.buttonDeleteContractor.isClickable = true
-//            updateContractorBinding.progressBar.visibility = View.INVISIBLE
-//        }
-
+        updateContractorBinding.buttonUpdateContractor.isClickable = true
+        updateContractorBinding.buttonDeleteContractor.isClickable = true
+        updateContractorBinding.progressBar.visibility = View.INVISIBLE
     }
 
-//    private fun retrieveDetailsFromDb() {
-//        reference.orderByChild("contractorId").equalTo(uid).addValueEventListener(object: ValueEventListener{
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                for(ds in snapshot.children){
-//                    updateContractorBinding.textInputContractorName.setText(ds.child("contractorName").value.toString())
-//                    updateContractorBinding.textInputContractorEmail.setText(ds.child("contractorEmail").value.toString())
-//                    updateContractorBinding.textInputContractorPass.setText(ds.child("contractorPassword").value.toString())
-//                    updateContractorBinding.textInputMessName.setText(ds.child("messName").value.toString())
-//                    updateContractorBinding.textInputCostPerDay.setText(ds.child("costPerDay").value.toString())
-//                    updateContractorBinding.textInputFoodType.setText(ds.child("foodType").value.toString())
-//                    updateContractorBinding.textInputCapacity.setText(ds.child("capacity").value.toString())
-//                    updateContractorBinding.textInputAvailability.setText(ds.child("availability").value.toString())
-//                    slotFilled = ds.child("capacity").value.toString().toInt() - ds.child("availability").value.toString().toInt()
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                TODO("Not yet implemented")
-//            }
-//
-//        })
-//    }
+    private fun retrieveDetailsFromDb() {
+        contractorId = arguments?.getString("contractorId").toString()
 
-    private fun receiveContractorDetails() {
-        updateContractorBinding.textInputContractorName.setText(arguments?.getString("contractorName").toString())
-        updateContractorBinding.textInputContractorEmail.setText(arguments?.getString("contractorEmail").toString())
-        updateContractorBinding.textInputContractorPass.setText(arguments?.getString("contractorPassword").toString())
-        updateContractorBinding.textInputMessName.setText(arguments?.getString("messName").toString())
-        updateContractorBinding.textInputCostPerDay.setText(arguments?.getString("costPerDay").toString())
-        updateContractorBinding.textInputFoodType.setText(arguments?.getString("foodType").toString())
-        updateContractorBinding.textInputCapacity.setText(arguments?.getString("capacity").toString())
-        updateContractorBinding.textInputAvailability.setText(arguments?.getString("availability").toString())
-        uid = arguments?.getString("contractorId").toString()
-        slotFilled = arguments?.getString("capacity").toString().toInt() - arguments?.getString("availability").toString().toInt()
+        val profileService: ProfileService = ServiceBuilder.buildService(ProfileService::class.java)
+        val requestCall = profileService.getContractorProfileWithId(sharedViewModel.token, contractorId)
+
+       requestCall.enqueue(object: Callback<Contractor>{
+           override fun onResponse(call: Call<Contractor>, response: Response<Contractor>) {
+               if(response.isSuccessful){
+                   val contractor = response.body()
+                   if(contractor != null){
+                       updateContractorBinding.textInputContractorName.setText(contractor.contractorName)
+                       updateContractorBinding.textInputContractorEmail.setText(contractor.contractorEmail)
+                       updateContractorBinding.textInputContractorPass.setText(contractor.contractorPassword)
+                       updateContractorBinding.textInputMessName.setText(contractor.messName)
+                       updateContractorBinding.textInputCostPerDay.setText(contractor.costPerDay.toString())
+                       updateContractorBinding.textInputFoodType.setText(contractor.foodType)
+                       updateContractorBinding.textInputCapacity.setText(contractor.capacity.toString())
+                       updateContractorBinding.textInputAvailability.setText(contractor.availability.toString())
+                       slotFilled = contractor.capacity - contractor.availability
+                   }
+                   else{
+                       Toast.makeText(context, "Contractor not found", Toast.LENGTH_SHORT).show()
+                       clearAllTextArea()
+                   }
+               }
+               else
+                   Toast.makeText(context, "Server Error", Toast.LENGTH_SHORT).show()
+           }
+
+           override fun onFailure(call: Call<Contractor>, t: Throwable) {
+               Log.d("getContractorDetails", t.localizedMessage)
+               Toast.makeText(context, t.localizedMessage, Toast.LENGTH_SHORT).show()
+           }
+
+       })
     }
 
 }
