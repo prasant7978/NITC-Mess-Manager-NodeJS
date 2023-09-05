@@ -38,16 +38,6 @@ class ContractorAdapter(private var contractorList : ArrayList<Contractor>, frag
         holder.adapterBinding.constraintLayout.setOnClickListener {
             val bundle = Bundle()
             bundle.putString("contractorId", contractorList[position]._id)
-//            bundle.putString("contractorEmail",contractorList[position].contractorEmail)
-//            bundle.putString("contractorPassword",contractorList[position].contractorPassword)
-//            bundle.putString("contractorName",contractorList[position].contractorName)
-//            bundle.putString("costPerDay",contractorList[position].costPerDay.toString())
-//            bundle.putString("messName",contractorList[position].messName)
-//            bundle.putString("foodType",contractorList[position].foodType)
-//            bundle.putString("capacity",contractorList[position].capacity.toString())
-//            bundle.putString("availability",contractorList[position].availability.toString())
-//            adminViewModel.feedbackList = contractorList[position].feedbackReceived
-//            adminViewModel.studentEnrolledList = contractorList[position].studentEnrolled
 
             val updateContractorFragment = UpdateContractorFragment()
             updateContractorFragment.arguments = bundle

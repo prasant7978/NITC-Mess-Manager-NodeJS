@@ -135,22 +135,6 @@ class AddContractorFragment : Fragment() {
             }
 
         })
-
-//        auth.createUserWithEmailAndPassword(contEmail,contPass).addOnCompleteListener { task ->
-//            if(task.isSuccessful){
-//                val uid = task.result.user?.uid.toString()
-//                val feedBackList  = ArrayList<Feedback>()
-//                val studentEnrolledList  = ArrayList<Student>()
-//                val contractor = Contractor(uid,contEmail,contPass,"Contractor",contName,costPerDay.toInt(),messName,foodType,capacity.toInt(),capacity.toInt(),0)
-//
-//                reference.child(uid).setValue(contractor)
-//
-//                Snackbar.make(addContractorBinding.linearLayout,"Contractor account created", Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
-//                clearAllTextArea()
-//            }else{
-//                Toast.makeText(activity,task.exception?.localizedMessage,Toast.LENGTH_LONG).show()
-//            }
-//        }
     }
 
     private fun clearAllTextArea() {

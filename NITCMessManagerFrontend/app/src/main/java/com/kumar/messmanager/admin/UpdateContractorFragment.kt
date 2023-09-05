@@ -126,30 +126,6 @@ class UpdateContractorFragment : Fragment() {
             }
 
         })
-
-//        reference.child(uid).removeValue().addOnCompleteListener { task ->
-//            if(task.isSuccessful){
-//                reference.orderByChild("studentId").equalTo(uid).addListenerForSingleValueEvent(object : ValueEventListener{
-//                    override fun onDataChange(snapshot: DataSnapshot) {
-//                        for(ds in snapshot.children){
-//                            contractor = ds.getValue(Contractor::class.java)!!
-//                        }
-//                    }
-//
-//                    override fun onCancelled(error: DatabaseError) {
-//                        TODO("Not yet implemented")
-//                    }
-//
-//                })
-//
-//                clearAllTextArea()
-//                Snackbar.make(updateContractorBinding.linearLayout,"The contractor has been deleted",Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
-//                requireActivity().supportFragmentManager.popBackStack()
-//            }
-//            else{
-//                Snackbar.make(updateContractorBinding.linearLayout,"The deletion was not successful, Please try again!",Snackbar.LENGTH_LONG).setAction("close",View.OnClickListener { }).show()
-//            }
-//        }
     }
 
     private fun clearAllTextArea() {
