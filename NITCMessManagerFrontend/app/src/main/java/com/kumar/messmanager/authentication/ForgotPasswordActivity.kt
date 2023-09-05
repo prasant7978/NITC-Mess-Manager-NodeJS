@@ -2,6 +2,8 @@ package com.kumar.messmanager.authentication
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import com.google.android.material.snackbar.Snackbar
 import com.kumar.messmanager.databinding.ActivityForgotPasswordBinding
 
 class ForgotPasswordActivity : AppCompatActivity() {
@@ -16,6 +18,12 @@ class ForgotPasswordActivity : AppCompatActivity() {
         val view = forgotBinding.root
 
         setContentView(view)
+
+        forgotBinding.editTextResetEmail.isEnabled = false
+        forgotBinding.buttonResetPassword.isClickable = false
+
+        Snackbar.make(forgotBinding.forgotPasswordLayout,"'Forgot Password' is currently under development, please contact Admin to change your password",Snackbar.LENGTH_INDEFINITE)
+                        .setAction("close", View.OnClickListener {  }).show()
 
 //        forgotBinding.buttonResetPassword.setOnClickListener {
 //            val email = forgotBinding.editTextResetEmail.text.toString()
